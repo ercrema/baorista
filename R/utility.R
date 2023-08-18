@@ -61,3 +61,28 @@ suppressMessages(registerDistributions(list(
   ))))
 
 
+dAoristicExponentialGrowth_vector=nimbleFunction(
+  run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
+    returnType(double(0))
+    t = 1:z
+    n = numeric(z)
+    for (i in 1:z)
+    {
+      n[i] = (1+r)^t[i]
+    }
+    p = n/sum(n)
+    pg = x %*% p
+    logProb = sum(log(pg))
+    if(log) {
+      return(logProb)
+    } else {
+      return(exp(logProb))
+    }
+  })   
+
+suppressMessages(registerDistributions(list(
+  dAoristicExponentialGrowth_vector = list(
+    BUGSdist = "dAoristicExponentialGrowth_vector(z,r)",
+    pqAvail = FALSE,
+    types = c('value = double(2)', 'z = integer(0)','r=double(0)')
+  ))))

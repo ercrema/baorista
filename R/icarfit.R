@@ -65,7 +65,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		# 	sigmaSampler=list('sigma',type='slice')
 		do.call(conf$addSampler,sigmaSampler)
 	}
-	conf$addMonitors('p')
+	suppressMessages(conf$addMonitors('p'))
 	MCMC <- buildMCMC(conf)
 	suppressMessages(cMCMC <- compileNimble(MCMC))
 	results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
