@@ -6,3 +6,30 @@ library(devtools)
 install_github('ercrema/baorista')
 ```
 
+## Sample Script
+### Data Preparation
+_baorista_ can read two types of data: a) tables containing two columns defining the start and end date of time-spans of existence recorded in BP; or b) matrices containing probability mass for each event (row) at each time-block (column). Sample datasets are provided.
+
+```
+data(sample_df)
+data(sample_mat)
+```
+
+The function `createProbMat` creates an object of class `probMat` which standardise the data format and includes additional information such as chronological range and resolution:
+
+```
+df.x <- createProbMat(x=sample_df,timeRange=c(5000,3001),resolution=100)
+df.mat <- createProbMat(pmat=sample_mat,timeRange=c(5000,3001),resolution=50)
+```
+
+The standard `plot()` function displays `probMat` class object using aoristic sums:
+
+```
+plot(df.x)
+plot(df.mat)
+```
+### Bayesian Inference
+
+##### Estimating Exponential Growth Rate
+
+##### Non-Parametric Modelling via Random Walk ICAR Model
