@@ -1,2 +1,8 @@
 # baorista
-R package for Bayesian and Frequentist Aoristic inference
+_baorista_ is an R package that provides a Bayesian inferential tool for analysing time-frequencies of archaeological events associated with time spans typically obtained from relative chronological sequences (e.g. periods and phases) and often analyses using aoristic sums. At its core _baorista_ is a frontend for fitting Bayesian models via the [NIMBLE probabilistic programming language](https://r-nimble.org/). The package is currently in beta development and can be installed using `devtools`:
+
+```
+library(devtools)
+install_github('ercrema/baorista')
+```
+
