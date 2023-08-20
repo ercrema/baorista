@@ -29,18 +29,15 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	# Define Constant
 	constants  <- list()
 	constants$n.tblocks  <- ncol(d$theta) 
-	constants$weights <- icar.struct(constants$n.tblocks)$weight
-	constants$num <- icar.struct(constants$n.tblocks)$num
-	constants$adj <- icar.struct(constants$n.tblocks)$adj
-	constants$L  <- length(constants$adj)
 
 	if (!parallel)
  	{
 	expmodel  <- nimbleCode({
 		theta[,] ~ dAoristicExponentialGrowth_vector(r=r,z=n.tblocks)
 		r ~ dnorm(mean=0,sd=0.05)
-
 	})
+
+	assign('dAoristicExponentialGrowth_vector',dAoristicExponentialGrowth_vector,envir=.GlobalEnv)
 
 	expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
 
@@ -52,16 +49,17 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	}
 	print('Compiling nimble model...')
 	suppressMessages(model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits[[1]]))
+	assign('rAoristicExponentialGrowth_vector',rAoristicExponentialGrowth_vector,envir=.GlobalEnv)
 	suppressMessages(cModel <- compileNimble(model))
 	suppressMessages(conf <- configureMCMC(model))
 	if (!is.null(rSampler))
 	{
 		suppressMessages(conf$removeSamplers('r'))
 		# 	rSampler=list('sigma',type='slice')
-		do.call(conf$addSampler,rSampler)
+		suppressMessages(do.call(conf$addSampler,rSampler))
 	}
 	suppressMessages(conf$addMonitors('r'))
-	MCMC <- buildMCMC(conf)
+	suppressMessages(MCMC <- buildMCMC(conf))
 	suppressMessages(cMCMC <- compileNimble(MCMC))
 	results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
 
@@ -115,7 +113,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 			}
 			MCMC <- buildMCMC(conf)
 			cMCMC <- compileNimble(MCMC)
-			results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,samplesAsCodaMCMC = T,setSeed=seeds)
+			results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,samplesAsCodaMCMC = T,setSeed=seed)
 		}
 
 		ncores  <- nchains

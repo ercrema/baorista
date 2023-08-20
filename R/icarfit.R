@@ -47,7 +47,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		tau <- 1/sigma^2
 		sigma  ~ dexp(1)
 	})
-
+	assign("dAoristicGeneral_vector",dAoristicGeneral_vector,envir=.GlobalEnv)
 	icarmodel <- gsub('dexp\\(1\\)', sigmaPrior, deparse(icarmodel)) |> parse(text=_)
 
 	inits  <- vector('list',length=nchains)
@@ -57,16 +57,17 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 	}
 	print('Compiling nimble model...')
 	suppressMessages(model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits[[1]]))
+	assign("rAoristicGeneral_vector",rAoristicGeneral_vector,envir=.GlobalEnv)
 	suppressMessages(cModel <- compileNimble(model))
 	suppressMessages(conf <- configureMCMC(model))
 	if (!is.null(sigmaSampler))
 	{
 		suppressMessages(conf$removeSamplers('sigma'))
 		# 	sigmaSampler=list('sigma',type='slice')
-		do.call(conf$addSampler,sigmaSampler)
+		suppressMessages(do.call(conf$addSampler,sigmaSampler))
 	}
 	suppressMessages(conf$addMonitors('p'))
-	MCMC <- buildMCMC(conf)
+	suppressMessages(MCMC <- buildMCMC(conf))
 	suppressMessages(cMCMC <- compileNimble(MCMC))
 	results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
 
@@ -118,7 +119,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 			}
 			MCMC <- buildMCMC(conf)
 			cMCMC <- compileNimble(MCMC)
-			results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,samplesAsCodaMCMC = T)
+			results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,samplesAsCodaMCMC = T,setSeed=seed)
 		}
 
 		ncores  <- nchains
