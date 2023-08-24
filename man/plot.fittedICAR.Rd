@@ -16,7 +16,8 @@
   col2 = "lightblue",
   pch = 20,
   plot.legend = TRUE,
-  legend.arg = NULL
+  legend.arg = NULL,
+  ...
 )
 }
 \arguments{
@@ -39,6 +40,8 @@
 \item{pch}{Point symbol used to display mean posteriors}
 
 \item{plot.legend}{Logical indicating whether to display a legend or not (default is TRUE).}
+
+\item{...}{Additional arguments affecting the plot.}
 }
 \description{
 Plot posterior estimates of \code{fittedICAR} class objects.

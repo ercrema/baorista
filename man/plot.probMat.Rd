@@ -7,7 +7,8 @@
 \method{plot}{probMat}(
   x,
   xlab = NULL,
-  ylab = "Summed Probability",
+  ylab = NULL,
+  type = "asum",
   calendar = "BP",
   lwd = 1,
   col = 1,
@@ -21,7 +22,9 @@
 
 \item{xlab}{Label for the x-axis. Default based on \code{calendar}.}
 
-\item{ylab}{Label for the y-axis. Default is 'Summed Probability'.}
+\item{ylab}{Label for the y-axis. Default is 'Summed Probability' (if \code{type}='asum') or 'Probability Mass' (when \code{type}='dens').}
+
+\item{type}{Either 'asum' for Aoristic Sum, 'dens' for probability mass. Default is 'asum'.}
 
 \item{calendar}{Either \code{'BP'} or \code{'BCAD'}. Indicate whether the x-axis should be displayed in BP or BC/AD. Default is  \code{'BP'}.}
 
@@ -32,6 +35,8 @@
 \item{minortick}{Interval for minor ticks in the x-axis label. Default is estimated based on timescale}
 
 \item{add}{if set to \code{TRUE} adds the line and point graph on existing plot.}
+
+\item{...}{Additional arguments affecting the plot.}
 }
 \description{
 Plot summed probabilities of aoristic weights.

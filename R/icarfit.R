@@ -40,10 +40,12 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		theta[,] ~ dAoristicGeneral_vector(p=p[1:n.tblocks])
 		for (i in 1:n.tblocks)
 		{
-			p[i]  <- lpseq[i]^2 / lpseqSS
+# 			p[i]  <- lpseq[i]^2 / lpseqSS
+			p[i]  <- exp(lpseq[i]) / lpseqSS
 		}
 		lpseq[1:n.tblocks] ~ dcar_normal(adj[1:L], weights[1:L], num[1:n.tblocks], tau, zero_mean = 0)
-		lpseqSS  <- sum(lpseq[1:n.tblocks]^2)
+# 		lpseqSS  <- sum(lpseq[1:n.tblocks]^2)
+		lpseqSS  <- sum(exp(lpseq[1:n.tblocks]))
 		tau <- 1/sigma^2
 		sigma  ~ dexp(1)
 	})
@@ -97,10 +99,12 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 				theta[,] ~ dAOG(p=p[1:n.tblocks])
 				for (i in 1:n.tblocks)
 				{
-					p[i]  <- lpseq[i]^2 / lpseqSS
+# 					p[i]  <- lpseq[i]^2 / lpseqSS
+					p[i]  <- exp(lpseq[i]) / lpseqSS
 				}
 				lpseq[1:n.tblocks] ~ dcar_normal(adj[1:L], weights[1:L], num[1:n.tblocks], tau, zero_mean = 0)
-				lpseqSS  <- sum(lpseq[1:n.tblocks]^2)
+# 				lpseqSS  <- sum(lpseq[1:n.tblocks]^2)
+				lpseqSS  <- sum(exp(lpseq[1:n.tblocks]))
 				tau <- 1/sigma^2
 				sigma  ~ dexp(1)
 			})
