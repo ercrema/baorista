@@ -61,6 +61,8 @@ suppressMessages(registerDistributions(list(
   ))))
 
 
+# Register Exponential Growth Distribution
+
 dAoristicExponentialGrowth_vector=nimbleFunction(
   run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
     returnType(double(0))
@@ -85,4 +87,29 @@ suppressMessages(registerDistributions(list(
     BUGSdist = "dAoristicExponentialGrowth_vector(z,r)",
     pqAvail = FALSE,
     types = c('value = double(2)', 'z = integer(0)','r=double(0)')
+  ))))
+
+
+
+# Register Logistic Growth Distribution
+dAoristicLogisticGrowth_vector=nimbleFunction(
+  run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
+    returnType(double(0))
+    t = 1:z
+    n = 1/(1+exp(-r*(t-m)))
+    p = n/sum(n)
+    pg = x %*% p
+    logProb = sum(log(pg))
+    if(log) {
+      return(logProb)
+    } else {
+      return(exp(logProb))
+    }
+  })   
+
+suppressMessages(registerDistributions(list(
+  dAoristicLogisticGrowth_vector = list(
+    BUGSdist = "dAoristicLogisticGrowth_vector(z,r,m)",
+    pqAvail = FALSE,
+    types = c('value = double(2)', 'z = integer(0)','r=double(0)','m=integer(0)')
   ))))
