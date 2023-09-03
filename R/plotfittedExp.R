@@ -13,33 +13,17 @@
 #' @param col1 Fill color for the first (inner) HPD interval. Default is 'steelblue'.
 #' @param col2 Fill color for the second (outer) HPD interval. Default is 'lightblue'.
 #' @param plot.legend Logical indicating whether to display a legend or not (default is TRUE).
+#' @param ... Additional arguments affecting the plot.
 #' @method plot fittedExp
 #' @export
 
 
-plot.fittedExp <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col='black',lwd=1,lty=2,col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL)
+plot.fittedExp <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col='black',lwd=1,lty=2,col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL,...)
 {
 	require(coda)
 	midPoints  <- apply(x$x$tblocks,1,median)
 	scl  <- diff(pretty(midPoints))[1]
 	minortick <- ifelse(is.null(minortick),round(scl/5),minortick)
-
-	a  <- x$x$timeRange[1]
-	b  <- x$x$timeRange[2]
-	r  <- x$posterior.r[[1]] |> as.numeric()
-	post.mat  <- matrix(NA,nrow=nrow(x$posterior.r),ncol=length(a:b))
-	for (i in 1:nrow(post.mat))
-	{
-		t  <-  1:(abs(b-a)+1)
-		n  <-  numeric(abs(b-a)+1)
-		tfinal  <-  abs(b-a)+1
-		for (j in 1:tfinal)
-		{
-			n[j]  <-  (1+r[i])^t[j]
-		}
-		post.mat[i,]  <-  n/sum(n)
-	}
-
 
 	if (calendar=="BP"){
 		xlabel <- ifelse(is.null(xlab),"Years cal BP",xlab)
@@ -58,27 +42,53 @@ plot.fittedExp <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,y
 		labs  <- abs(labs)
 	}
 
-	### FROM HERE ###
+	a  <- x$x$timeRange[1]
+	b  <- x$x$timeRange[2]
+	r  <- x$posterior.r[[1]] |> as.numeric()
+	post.mat  <- matrix(NA,nrow=nrow(x$posterior.r),ncol=length(a:b))
+	for (i in 1:nrow(post.mat))
+	{
+		t  <-  1:(abs(b-a)+1)
+		n  <-  numeric(abs(b-a)+1)
+		tfinal  <-  abs(b-a)+1
+		for (j in 1:tfinal)
+		{
+			n[j]  <-  (1+r[i])^t[j]
+		}
+		post.mat[i,]  <-  n/sum(n)
+	}
 
-	lohi1 <- apply(post.mat,2,function(x,hpd){HPDinterval(as.mcmc(x),prob=hpd)},hpd=hpd[1])
-	lohi2 <- apply(post.mat,2,function(x,hpd){HPDinterval(as.mcmc(x),prob=hpd)},hpd=hpd[2])
+	tblocks.search  <- a - x$x$tblocks + 1
+	res.mat <- matrix(NA,nrow=nrow(post.mat),ncol=nrow(tblocks.search))
+	for (i in 1:nrow(tblocks.search))
+	{
+		res.mat[,i] = apply(post.mat[,tblocks.search[i,1]:tblocks.search[i,2]],1,sum)
+	}
 
+
+	lohi1 <- t(apply(res.mat,2,function(x,p){HPDinterval(as.mcmc(x),prob=p)},p=hpd[1]))
+	lohi2 <- t(apply(res.mat,2,function(x,p){HPDinterval(as.mcmc(x),prob=p)},p=hpd[2]))
 
 	if(is.null(ylim)){ylim=c(0,max(lohi2))}
 
 	par(lend=2)
-	plot(NULL,axes=FALSE,xlab=xlabel,ylab=ylab,xlim=x$x$timeRange,ylim=ylim)
-	polygon(c(a:b,b:a),c(lohi1[1,],rev(lohi1[2,])),border=NA,col=col1)
-	polygon(c(a:b,b:a),c(lohi2[1,],rev(lohi1[1,])),border=NA,col=col2)
-	polygon(c(a:b,b:a),c(lohi2[2,],rev(lohi1[2,])),border=NA,col=col2)
-	lines(a:b,apply(post.mat,2,mean),col=col,lwd=lwd,lty=lty)
+	plot(NULL,axes=FALSE,xlab=xlabel,ylab=ylab,xlim=x$x$timeRange,ylim=ylim,...)
+
+	for (i in 1:nrow(lohi1))
+	{
+		rect(ybottom=lohi2[i,1],ytop=lohi1[i,1],xleft=midPoints[i]+x$x$resolution/2,xright=midPoints[i]-x$x$resolution/2,border=NA,col=col2)
+		rect(ybottom=lohi1[i,1],ytop=lohi1[i,2],xleft=midPoints[i]+x$x$resolution/2,xright=midPoints[i]-x$x$resolution/2,border=NA,col=col1)
+		rect(ybottom=lohi1[i,2],ytop=lohi2[i,2],xleft=midPoints[i]+x$x$resolution/2,xright=midPoints[i]-x$x$resolution/2,border=NA,col=col2)
+	}
+
+	points(midPoints,apply(res.mat,2,mean),pch=pch)
 	axis(1,at=labs.pos,labels=labs)
 	axis(1,at=minortick.pos,labels=NA,tck=-0.01)
 	axis(2)
 	box()
 	if (plot.legend)
 	{
-		tmp.list <- list(legend = c(paste0(round(hpd[1]*100),'% HPDI'),paste0(round(hpd[2]*100),'% HPDI'),'Posterior Mean'),col = c(col1,col2,col),lwd=c(8,8,lwd),lty=c(1,1,lty))
+		tmp.list <- list(legend = c(paste0(round(hpd[1]*100),'% HPDI'),paste0(round(hpd[2]*100),'% HPDI'),'Posterior Mean'),col = c(col1,col2,1),lwd=c(8,8,NA),pch=c(NA,NA,pch))
 		if(is.null(legend.arg))
 			{
 				legend.arg2=c(list(x='topleft'),tmp.list)
@@ -92,6 +102,7 @@ plot.fittedExp <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,y
 				do.call(legend,legend.arg2)
 			}
 	}
+
 }
 
 

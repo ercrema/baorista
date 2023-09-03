@@ -11,11 +11,12 @@
 #' @param col1 Fill color for the second (outer) HPD interval. Default is 'lightblue'.
 #' @param pch Point symbol used to display mean posteriors
 #' @param plot.legend Logical indicating whether to display a legend or not (default is TRUE).
+#' @param ... Additional arguments affecting the plot.
 #' @method plot fittedICAR
 #' @export
 
 
-plot.fittedICAR <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL)
+plot.fittedICAR <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL,...)
 {
 	require(coda)
 	midPoints  <- apply(x$x$tblocks,1,median)
@@ -46,7 +47,7 @@ plot.fittedICAR <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,
 	if(is.null(ylim)){ylim=c(0,max(lohi2))}
 
 	par(lend=2)
-	plot(NULL,axes=FALSE,xlab=xlabel,ylab=ylab,xlim=x$x$timeRange,ylim=ylim)
+	plot(NULL,axes=FALSE,xlab=xlabel,ylab=ylab,xlim=x$x$timeRange,ylim=ylim,...)
 
 	for (i in 1:nrow(lohi1))
 	{

@@ -19,7 +19,8 @@
   col2 = "lightblue",
   pch = 20,
   plot.legend = TRUE,
-  legend.arg = NULL
+  legend.arg = NULL,
+  ...
 )
 }
 \arguments{
@@ -48,6 +49,8 @@
 \item{col2}{Fill color for the second (outer) HPD interval. Default is 'lightblue'.}
 
 \item{plot.legend}{Logical indicating whether to display a legend or not (default is TRUE).}
+
+\item{...}{Additional arguments affecting the plot.}
 }
 \description{
 Plot posterior estimates of \code{fittedExp} class objects.
