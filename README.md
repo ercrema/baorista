@@ -68,3 +68,6 @@ plot(non.param.fit)
 ```
 ![image](https://github.com/ercrema/baorista/blob/main/readme_figs/fig3.png)
 
+## Funding
+The development of this package was funded by a Philip Leverhulme Prize (PLP-2019-304) awarded to E.Crema.
+
