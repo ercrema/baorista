@@ -2,10 +2,12 @@
 
 S3method(plot,fittedExp)
 S3method(plot,fittedICAR)
+S3method(plot,fittedLogistic)
 S3method(plot,probMat)
 export(createProbMat)
 export(expfit)
 export(icarfit)
+export(logisticfit)
 import(coda)
 import(nimble)
 import(parallel)
