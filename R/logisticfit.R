@@ -150,15 +150,16 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		results <- out
 	}
 
-	diagnostic  <- gelman.diag(results,multivariate=FALSE) 
-	if (any(diagnostic[[1]][,1]>1.01)){warning(paste0('Rhat value above 1.01 (',round(max(diagnostic[[1]][,1]),3),'). Consider rerunning the model with a higher number of iterations'))}
+	rhat  <- gelman.diag(results,multivariate=FALSE) 
+	ess  <- effectiveSize(results)
+	if (any(rhat[[1]][,1]>1.01)){warning(paste0('Rhat value above 1.01 (',round(max(rhat[[1]][,1]),3),'). Consider rerunning the model with a higher number of iterations'))}
 	posterior <- do.call(rbind.data.frame,results)
  	posterior.r  <- posterior[,'r']/x$resolution #scale to match resolution
 	posterior.m <- mids[posterior[,'m']]
 	posterior.m.index <- posterior[,'m']
 
 
-	results  <- list(x=x,posterior.r=posterior.r,posterior.m=posterior.m,posterior.m.index=posterior.m.index,diagnostic=diagnostic)
+	results  <- list(x=x,posterior.r=posterior.r,posterior.m=posterior.m,posterior.m.index=posterior.m.index,rhat=rhat,ess=ess)
 	class(results)  <- c('fittedLogistic',class(results))
 	return(results)
 }

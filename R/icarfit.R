@@ -132,12 +132,13 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		stopCluster(cl)
 		results <- out
 	}
-	diagnostic  <- gelman.diag(results,multivariate=FALSE) 
-	if (any(diagnostic[[1]][,1]>1.01)){warning(paste0('Highest Rhat value above 1.01 (',round(max(diagnostic[[1]][,1]),3),'). Consider rerunning the model with a higher number of iterations'))}
+	rhat  <- gelman.diag(results,multivariate=FALSE) 
+	ess  <- effectiveSize(results)
+	if (any(rhat[[1]][,1]>1.01)){warning(paste0('Highest Rhat value above 1.01 (',round(max(rhat[[1]][,1]),3),'). Consider rerunning the model with a higher number of iterations'))}
 	posteriors <- do.call(rbind.data.frame,results)
 	posterior.sigma <- posteriors[,'sigma']
 	posterior.p <- posteriors[,grep('p\\[',colnames(posteriors))]
-	results  <- list(x=x,posterior.p=posterior.p,posterior.sigma=posterior.sigma,diagnostic=diagnostic)
+	results  <- list(x=x,posterior.p=posterior.p,posterior.sigma=posterior.sigma,rhat=rhat,ess=ess)
 	class(results)  <- c('fittedICAR',class(results))
 	return(results)
 }

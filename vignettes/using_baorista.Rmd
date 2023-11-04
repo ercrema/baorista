@@ -1,0 +1,132 @@
+---
+title: "Quick Start with the baorista R package"
+author: "Enrico Crema"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    fig_caption: true
+    self_contained: yes
+fontsize: 11pt
+documentclass: article
+vignette: >
+  %\VignetteIndexEntry{Quick Start with the baorista R package}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+---
+
+```{r general setup, include = FALSE}
+h = 3.5
+w = 3.5
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
+```
+
+# Introduction
+
+_Baorista_ is an R package that provides robust alternatives to aoristic analyses based on parametric and non-parametric Bayesian inference.
+The package consists of a series of utility and wrapper functions as well as custom statistical distributions for the [NIMBLE](https://cran.r-project.org/package=nimble) probabilistic programming language. 
+This documents provides a short guide for the key steps required to setup datasets and execute the core functionalities of _baorista_.
+
+
+## Installing and loading the _baorista_ package
+
+_Baorista_ is currently not available on CRAN but can be installed via `devtools` directly from this repository with the following command:
+
+```{r,eval=F}
+library(devtools)
+install_github('ercrema/baorista')
+library(baorista)
+```
+
+```{r,echo=F}
+library(baorista)
+```
+
+
+# Using _baorista_
+
+## Data Preparation
+
+_baorista_ can read two types of data: a) `data.frame` class objects containing two fields recording the start and end date of the time-spans of existence recorded in BP, and  b) matrices containing the probability of existence for each event (row) at each time-block (column). Sample datasets of the two formats are provided:
+
+```{r}
+data(sampledf) #two column data.frame format
+data(samplemat) #events x time-block matrix format
+```
+
+The function `createProbMat()` creates an object of class `probMat` which standardise the data format and includes additional information such as chronological range and resolution:
+
+```{r}
+x.df <- createProbMat(x=sampledf,timeRange=c(6500,4001),resolution=50) #50 year timeblock ranging from 6500 to 4001 (i.e. 6500-6451,6450-6401,...)
+x.mat <- createProbMat(pmat=samplemat,timeRange=c(5000,3001),resolution=100)
+```
+
+The `plot()` function displays `probMat` class object using aoristic sums:
+
+```{r,fig.width=7,fig.height=4}
+par(mfrow=c(1,2))
+plot(x.df,main='x.df')
+plot(x.mat,main='x.mat')
+```
+
+## Bayesian Inference
+
+_baorista_ contains functions for running two types of Bayesian analyses: parametric and non-parametric. Parametric analyses requires the selection of a suitable growth model (each one is currently a separate function) and provides estimates of key model parameters. Non-parametric models employs an intrinsic conditional auto-regressive (ICAR) Gaussian model which enables the calculation of the probability mass function (i.e. it estimates the probability of _any_ event occurring at each timeblock, effectively recovering the shape of the time-frequency distribution).  
+In all cases _baorista_ provides a _wrapper_ function which internally initialises and runs an MCMC via the NIMBLE package. These function allow for user-defined MCMC settings (e.g. number of iterations, number chains, etc.), samplers, and priors and automatically assesses convergence statistics. 
+
+#### Estimating Exponential Growth Rate
+
+The most straightforward model is a truncated discrete exponential distribution. Users can fit the data to such distribution and estimate growth rates using the function `expfit()`. 
+
+```{r}
+exponential.fit <- expfit(x.mat) #fitting using default MCMC/Prior settings
+# expfit(x.mat,rPrior='dnorm(mean=0,sd=1)') #Using a Gaussian prior with mean 0 and sd 1 for the growth rate r
+# expfit(x.mat,niter=50000)  #Fitting the model with 50k iterations
+# expfit(x.mat,nchains=4,parallel=T)  #Running 4 chains in parallel
+```
+
+Summary statistics on the posterior parameters and the MCMC diagnostics can be retrieved using the `summary()` function:
+
+```{r}
+summary(exponential.fit)
+```
+
+Alternatively values can be extracted directly:
+
+```{r}
+#Compute 95% HPDI with coda package
+library(coda)
+mcmc(exponential.fit$posterior.r) |> HPDinterval(prob=0.89)
+#Plot with  bayesplot package:
+library(bayesplot)
+library(ggplot2)
+plot_title <- ggtitle("Posterior of Growth Rate","with medians and 89% intervals")
+mcmc_areas(exponential.fit$posterior.r,prob=0.89) + plot_title
+```
+
+A dedicated plot function can also be used to visualise the fitted exponential model:
+
+```
+plot(exponential.fit)
+```
+
+#### Non-Parametric Modelling via Random Walk ICAR Model
+
+_baorista_ offers also a non-parametric model based Random Walk ICAR. 
+The function `icarfit()` estimates the probability mass for each time-block accounting for the information from adjacent blocks (and hence temporal autocorrelation). 
+Given the larger number of parameters, the MCMC requires longer chains and the execution over multiple cores is recommended. 
+Convergence issues are also more likely to arise, in which case adjust running the model with longer chains, changing the sampler, or adjusting the priors is recommended. 
+
+```{r}
+# The following reaches convergence but takes a couple of hours:
+# non.param.fit <- icarfit(x.df,niter=2000000,nburnin=1000000,thin=100,nchains=4,parallel=TRUE)
+# Shorter number of iterations (does not reach convergence)
+non.param.fit <- icarfit(x.df,niter=100000,nburnin=50000,thin=50,nchains=4,parallel=TRUE)
+```
+A dedicated function can display the HPDI of the probability mass of each time-block:  
+
+```{r,fig.height=4,fig.width=5}
+plot(non.param.fit)
+```
+

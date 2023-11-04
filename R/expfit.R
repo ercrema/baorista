@@ -122,11 +122,12 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		stopCluster(cl)
 		results <- out
 	}
-	diagnostic  <- gelman.diag(results,multivariate=FALSE) 
-	if (any(diagnostic[[1]][,1]>1.01)){warning(paste0('Rhat value above 1.01 (',round(max(diagnostic[[1]][,1]),3),'). Consider rerunning the model with a higher number of iterations'))}
+	rhat  <- gelman.diag(results,multivariate=FALSE) 
+	ess  <- effectiveSize(results)
+	if (any(rhat[[1]][,1]>1.01)){warning(paste0('Rhat value above 1.01 (',round(max(rhat[[1]][,1]),3),'). Consider rerunning the model with a higher number of iterations'))}
 	posterior.r <- do.call(rbind.data.frame,results)
  	posterior.r  <- posterior.r/x$resolution #scale to match resolution
-	results  <- list(x=x,posterior.r=posterior.r,diagnostic=diagnostic)
+	results  <- list(x=x,posterior.r=posterior.r,rhat=rhat,ess=ess)
 	class(results)  <- c('fittedExp',class(results))
 	return(results)
 }
