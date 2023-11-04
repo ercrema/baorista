@@ -5,6 +5,7 @@ _baorista_ is an R package that provides a Bayesian inferential tool for analysi
 library(devtools)
 install_github('ercrema/baorista')
 ```
+For a quick introduction to _baorista_ check the package [vignette](https://github.com/ercrema/baorista/blob/main/vignettes/using_baorista.Rmd).
 
 ## Funding
 The development of this package was funded by a Philip Leverhulme Prize (PLP-2019-304) awarded to E.Crema.
