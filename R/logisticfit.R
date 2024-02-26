@@ -1,8 +1,8 @@
 #' @title Fits a Logistic growth model on Aoristic data
-#' @description Fits an exponential growth model to \code{ProbMat} calss objects.
+#' @description Fits an exponential growth model to \code{ProbMat} class objects.
 #' @param x A ProbMat class object
 #' @param niter Number of MCMC iterations. Default is 100,000.
-#' @param nburnin Mumber of iterations discarded for burnin. Default is 50,000.
+#' @param nburnin Number of iterations discarded for burn-in. Default is 50,000.
 #' @param thin Thinning interval
 #' @param nchains Number of MCMC chains
 #' @param rPrior A string defining prior for the growth parameter r. Default is 'dexp(1/0.01)'. 
@@ -11,7 +11,8 @@
 #' @param mSampler A list containing settings for the MCMC sampler for the parameter 'm'. Default is null and employs nimble's Default sampler (RW sampler).
 #' @param parallel Logical specifying whether the chains should be run in parallel or not.
 #' @param seeds Random seed for each chain. Default is 1:4.
-#' @details (To be completed)
+#' @details The function fits a discrete bounded logistic growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of two parameters, a growth rate (r) and a midpoint (m) defining the inflection point of the growth curve. Priors of the two parameters can be defined by the arguments \code{rPrior} and \code{mPrior}. In the latter case the object \code{z} is a placeholder for the number of blocks (e.g. the default 'dunif(1,z)` is a uniform across all blocks). Priors are defined by character strings following the syntax used by nimble. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.  
+#' @return A \code{fittedLogistic} class object containing the original ProbMat class object, posteriors of the growth rate and midpoint and their MCMC diagnostics (i.e. Gelman Rubin statistic and effective sample sizes).
 #' @import nimble
 #' @import coda
 #' @import parallel

@@ -1,6 +1,6 @@
 Package: baorista
 Title: Bayesian Aoristic Analyses 
-Version: 0.0.6
+Version: 0.0.7
 Authors@R: 
     person("Enrico", "Crema", , "enrico.crema@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6727-5138"))

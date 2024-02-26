@@ -1,4 +1,4 @@
-#' @title Generate a probMat class object from user data
+#' @title Creates a probMat class object from user data
 #' @description Converts either a data.frame with the start and end date of each event or matrix of probabilities values into a \code{probMat} class object.
 #' @param x A data.frame containing the start and end date of the timespan of each event. Dates should be in BP, with the first column defining the start and the second column defining the end of the timespan.
 #' @param pmat A matrix of aoristic weights (probabilities), with row representing events and column representing timeblocks.

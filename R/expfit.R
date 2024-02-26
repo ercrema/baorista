@@ -1,15 +1,16 @@
 #' @title Estimate Exponential Growth rate from  Aoristic data
-#' @description Fits an exponential growth model to \code{ProbMat} calss objects.
+#' @description Fits an exponential growth model to \code{ProbMat} class objects.
 #' @param x A ProbMat class object
 #' @param niter Number of MCMC iterations. Default is 500,000.
-#' @param nburnin Mumber of iterations discarded for burnin. Default is 250,000.
+#' @param nburnin Number of iterations discarded for burn-in. Default is 250,000.
 #' @param thin Thinning interval
 #' @param nchains Number of MCMC chains
 #' @param rPrior A string defining prior for the growth parameter r. Default is 'dnorm(mean=0,sd=0.05)'. 
 #' @param rSampler A list containing settings for the MCMC sampler. Default is null and employs nimble's Default sampler (RW sampler).
 #' @param parallel Logical specifying whether the chains should be run in parallel or not.
 #' @param seeds Random seed for each chain. Default is 1:4.
-#' @details (To be completed)
+#' @details The function fits a discrete bounded exponential growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of a single growth rate parameter (r), and users can define suitable priors using character strings for the argument \code{rPrior} (for details on how this should be specified please consult the nimble manual). Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.  
+#' @return A \code{fittedExp} class object containing the original ProbMat class object, posterior of the growth rate, along with its Gelman Rubin statistic and effective sample sizes. 
 #' @import nimble
 #' @import coda
 #' @import parallel

@@ -23,7 +23,7 @@ logisticfit(
 
 \item{niter}{Number of MCMC iterations. Default is 100,000.}
 
-\item{nburnin}{Mumber of iterations discarded for burnin. Default is 50,000.}
+\item{nburnin}{Number of iterations discarded for burn-in. Default is 50,000.}
 
 \item{thin}{Thinning interval}
 
@@ -41,9 +41,12 @@ logisticfit(
 
 \item{seeds}{Random seed for each chain. Default is 1:4.}
 }
+\value{
+A \code{fittedLogistic} class object containing the original ProbMat class object, posteriors of the growth rate and midpoint and their MCMC diagnostics (i.e. Gelman Rubin statistic and effective sample sizes).
+}
 \description{
-Fits an exponential growth model to \code{ProbMat} calss objects.
+Fits an exponential growth model to \code{ProbMat} class objects.
 }
 \details{
-(To be completed)
+The function fits a discrete bounded logistic growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of two parameters, a growth rate (r) and a midpoint (m) defining the inflection point of the growth curve. Priors of the two parameters can be defined by the arguments \code{rPrior} and \code{mPrior}. In the latter case the object \code{z} is a placeholder for the number of blocks (e.g. the default 'dunif(1,z)` is a uniform across all blocks). Priors are defined by character strings following the syntax used by nimble. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.
 }

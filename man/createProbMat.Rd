@@ -2,7 +2,7 @@
 % Please edit documentation in R/createProbMat.R
 \name{createProbMat}
 \alias{createProbMat}
-\title{Generate a probMat class object from user data}
+\title{Creates a probMat class object from user data}
 \usage{
 createProbMat(x = NULL, pmat = NULL, timeRange = NULL, resolution = NULL)
 }
