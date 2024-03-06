@@ -7,6 +7,9 @@ _baorista_ is an R package that provides a Bayesian inferential tool for analysi
 library(devtools)
 install_github('ercrema/baorista')
 ```
+
+Please note that baorista is based on Nimble, which requires a working C++ compiler. For more information please read the [dedicated section of the nimble manual](https://r-nimble.org/html_manual/cha-installing-nimble.html#sec:compiler).
+
 For a quick introduction to _baorista_ check the package [vignette](https://htmlpreview.github.io/?https://github.com/ercrema/baorista/blob/main/vignettes/using_baorista.html) as well as the associated [manuscript](https://osf.io/98qkx) and its [github repo](https://github.com/ercrema/beyond_aoristic)
 
 ## Funding

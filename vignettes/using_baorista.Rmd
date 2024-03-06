@@ -43,6 +43,7 @@ library(baorista)
 library(baorista)
 ```
 
+Please note that in order to execute all commands you need a working C++ compiler. For more further details please read the [nimble package documentation](https://r-nimble.org/html_manual/cha-installing-nimble.html)
 
 # Using _baorista_
 
