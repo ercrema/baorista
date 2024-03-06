@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^testenv/.*$
+^logo/.*$
+^\.travis\.yml$
+^\.github$
