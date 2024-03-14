@@ -16,13 +16,13 @@
 #' @import nimble
 #' @import coda
 #' @import parallel
+#' @importFrom stats rexp
 #' @export
 
 
 icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='dexp(1)',sigmaSampler=NULL,parallel=FALSE,seeds=1:4)
 {
-	require(nimble)
-	require(coda)
+	n.tblocks  <- lpseq <- sigma <- NULL
 
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
@@ -80,11 +80,10 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 
 	if (parallel)
 	{
-		require(parallel)
 		print('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,sigmaPrior,sigmaSampler)
 		{
-			require(nimble)
+# 			require(nimble)
 			dAOG=nimbleFunction(run = function(x = double(2),p=double(1),log = integer(0))
 							       {
 								       returnType(double(0))
@@ -131,6 +130,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
+		clusterEvalQ(cl,{library(nimble)})
 		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,sigmaPrior,sigmaSampler)
 		stopCluster(cl)
 		results <- out

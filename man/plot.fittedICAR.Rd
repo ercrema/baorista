@@ -35,11 +35,15 @@
 
 \item{calendar}{Either \code{'BP'} or \code{'BCAD'}. Indicate whether the x-axis should be displayed in BP or BC/AD. Default is \code{'BP'}.}
 
-\item{col1}{Fill color for the second (outer) HPD interval. Default is 'lightblue'.}
+\item{col1}{Fill color for the first (inner) HPD interval. Default is 'steelblue'.}
 
-\item{pch}{Point symbol used to display mean posteriors}
+\item{col2}{Fill color for the second (outer) HPD interval. Default is 'lightblue'.}
+
+\item{pch}{Point symbol used to display mean posteriors. Default is 20.}
 
 \item{plot.legend}{Logical indicating whether to display a legend or not (default is TRUE).}
+
+\item{legend.arg}{List containing arguments to be directed to the \code{legend()} function.}
 
 \item{...}{Additional arguments affecting the plot.}
 }

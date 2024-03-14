@@ -14,14 +14,12 @@
 #' @import nimble
 #' @import coda
 #' @import parallel
+#' @importFrom stats rnorm
 #' @export
 
 
 expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm(mean=0,sd=0.05)',rSampler=NULL,parallel=FALSE,seeds=1:4)
 {
-	require(nimble)
-	require(coda)
-
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
 
@@ -68,11 +66,10 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 
 	if (parallel)
 	{
-		require(parallel)
 		print('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
 		{
-			require(nimble)
+# 			require(nimble)
 			dAExp=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
 						     returnType(double(0))
@@ -119,6 +116,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
+		clusterEvalQ(cl,{library(nimble)})
 		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior,rSampler)
 		stopCluster(cl)
 		results <- out
@@ -132,3 +130,5 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	class(results)  <- c('fittedExp',class(results))
 	return(results)
 }
+
+

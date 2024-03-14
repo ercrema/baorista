@@ -8,17 +8,18 @@
 #' @param ylab Label for the y-axis. Default is "Probability Mass".
 #' @param calendar Either \code{'BP'} or \code{'BCAD'}. Indicate whether the x-axis should be displayed in BP or BC/AD. Default is \code{'BP'}.
 #' @param col1 Fill color for the first (inner) HPD interval. Default is 'steelblue'.
-#' @param col1 Fill color for the second (outer) HPD interval. Default is 'lightblue'.
-#' @param pch Point symbol used to display mean posteriors
+#' @param col2 Fill color for the second (outer) HPD interval. Default is 'lightblue'.
+#' @param pch Point symbol used to display mean posteriors. Default is 20.
 #' @param plot.legend Logical indicating whether to display a legend or not (default is TRUE).
+#' @param legend.arg List containing arguments to be directed to the \code{legend()} function.
 #' @param ... Additional arguments affecting the plot.
 #' @method plot fittedICAR
+#' @import graphics
 #' @export
 
 
 plot.fittedICAR <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL,...)
 {
-	require(coda)
 	midPoints  <- apply(x$x$tblocks,1,median)
 	scl  <- diff(pretty(midPoints))[1]
 	minortick <- ifelse(is.null(minortick),round(scl/5),minortick)

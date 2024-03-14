@@ -16,13 +16,12 @@
 #' @import nimble
 #' @import coda
 #' @import parallel
+#' @importFrom stats runif rexp
 #' @export
 
 logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dexp(1/0.001)',mPrior='dunif(1,z)',rSampler=NULL,mSampler=NULL,parallel=FALSE,seeds=1:4)
 {
-	require(nimble)
-	require(coda)
-
+	m.raw <- NULL
 	# Extract mid points
 	mids <- apply(x$tblocks,1,median)
 
@@ -83,11 +82,10 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 
 	if (parallel)
 	{
-		require(parallel)
 		print('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
 		{
-			require(nimble)
+# 			require(nimble)
 			dALog=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
 						     returnType(double(0))
@@ -146,6 +144,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
+		clusterEvalQ(cl,{library(nimble)})
 		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior,rSampler)
 		stopCluster(cl)
 		results <- out

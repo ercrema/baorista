@@ -1,11 +1,21 @@
-library(nimble)
-
+#' @keywords internal
 # Discrete Uniform Distribution 
 dunifdisc<-function(x, min=0, max=1) ifelse(x>=min & x<=max & round(x)==x, 1/(max-min+1), 0)
+
+#' @keywords internal
+# Discrete Uniform Distribution 
 punifdisc<-function(q, min=0, max=1) ifelse(q<min, 0, ifelse(q>=max, 1, (floor(q)-min+1)/(max-min+1)))
+
+#' @keywords internal
+# Discrete Uniform Distribution 
 qunifdisc<-function(p, min=0, max=1) floor(p*(max-min+1))
+
+#' @keywords internal
+# Discrete Uniform Distribution 
 runifdisc<-function(n, min=0, max=1) sample(min:max, n, replace=T)
 
+
+#' @keywords internal
 # Conversion to BCAD/BP
 BPtoBCAD <- function(x){
     index <- !is.na(x)
@@ -16,6 +26,8 @@ BPtoBCAD <- function(x){
     return(res[,2])
 }
 
+
+#' @keywords internal
 BCADtoBP <- function(x){
     index <- !is.na(x)
     if (any(x[index] == 0)){ stop("0 BC/AD is not a valid year.") }
@@ -26,6 +38,9 @@ BCADtoBP <- function(x){
     return(res[,2])
 }
 
+
+
+#' @keywords internal
 icar.struct  <- function(x)
 {
 	num  <- c(1,rep(2,x-2),1)
@@ -41,6 +56,9 @@ icar.struct  <- function(x)
 }
 
 
+
+#' @import nimble
+#' @keywords internal
 dAoristicGeneral_vector=nimbleFunction(
   run = function(x = double(2),p=double(1),log = integer(0)) {
     returnType(double(0))
@@ -63,6 +81,9 @@ suppressMessages(registerDistributions(list(
 
 # Register Exponential Growth Distribution
 
+
+#' @import nimble
+#' @keywords internal
 dAoristicExponentialGrowth_vector=nimbleFunction(
   run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
     returnType(double(0))
@@ -90,8 +111,8 @@ suppressMessages(registerDistributions(list(
   ))))
 
 
-
-# Register Logistic Growth Distribution
+#' @import nimble
+#' @keywords internal
 dAoristicLogisticGrowth_vector=nimbleFunction(
   run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
     returnType(double(0))
