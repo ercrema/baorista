@@ -4,7 +4,7 @@ Version: 0.1.0
 Authors@R: 
     person("Enrico", "Crema", , "enrico.crema@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6727-5138"))
-Description: Fits Bayesian non-parametric random-walk ICAR models to infer population curves from aoristic data. 
+Description: Fits Bayesian non-parametric random-walk ICAR models to infer population curves from aoristic data (Crema (2023)<doi:10.31219/osf.io/98qkx>).
 Depends: R (>= 3.5.0), nimble (>= 0.12.0)
 Imports: stats,coda,graphics
 Suggests: knitr, rmarkdown
