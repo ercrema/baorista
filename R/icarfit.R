@@ -50,7 +50,8 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		tau <- 1/sigma^2
 		sigma  ~ dexp(1)
 	})
-	assign("dAoristicGeneral_vector",dAoristicGeneral_vector,envir=.GlobalEnv)
+	pos <- 1
+	assign("dAoristicGeneral_vector",dAoristicGeneral_vector,envir=as.environment(pos))
 	icarmodel <- gsub('dexp\\(1\\)', sigmaPrior, deparse(icarmodel)) |> parse(text=_)
 
 	inits  <- vector('list',length=nchains)
@@ -60,7 +61,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 	}
 	print('Compiling nimble model...')
 	suppressMessages(model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits[[1]]))
-	assign("rAoristicGeneral_vector",rAoristicGeneral_vector,envir=.GlobalEnv)
+	assign("rAoristicGeneral_vector",rAoristicGeneral_vector,envir=as.environment(pos))
 	suppressMessages(cModel <- compileNimble(model))
 	suppressMessages(conf <- configureMCMC(model))
 	if (!is.null(sigmaSampler))
@@ -92,7 +93,8 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 									       return(exp(logProb))
 								       }
 							       })   
-			assign('dAOG',dAOG,envir=.GlobalEnv)
+			pos <- 1
+			assign('dAOG',dAOG,envir=as.environment(pos))
 
 			icarmodel  <- nimbleCode({
 				theta[,] ~ dAOG(p=p[1:n.tblocks])
@@ -111,7 +113,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 			set.seed(seed)
 			inits  <- list(sigma=rexp(1),lpseq=rnorm(constants$n.tblocks,0,0.5))
 			model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits)
-			assign('rAOG',rAOG,envir=.GlobalEnv)
+			assign('rAOG',rAOG,envir=as.environment(pos))
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('p')

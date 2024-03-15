@@ -42,8 +42,8 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		m.raw ~ mPrior
 		m  <- round(m.raw)
 	})
-
-	assign('dAoristicLogisticGrowth_vector',dAoristicLogisticGrowth_vector,envir=.GlobalEnv)
+	pos <- 1
+	assign('dAoristicLogisticGrowth_vector',dAoristicLogisticGrowth_vector,envir=as.environment(pos))
 
 
 	logisticmodel <- gsub('rPrior', rPrior, deparse(logisticmodel)) 
@@ -57,7 +57,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 	}
 	print('Compiling nimble model...')
 	suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
-	assign('rAoristicLogisticGrowth_vector',rAoristicLogisticGrowth_vector,envir=.GlobalEnv)
+	assign('rAoristicLogisticGrowth_vector',rAoristicLogisticGrowth_vector,envir=as.environment(pos))
 	suppressMessages(cModel <- compileNimble(model))
 	suppressMessages(conf <- configureMCMC(model))
 	if (!is.null(rSampler))
@@ -99,8 +99,8 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 							     return(exp(logProb))
 						     }
 					     })   
-
-			assign('dALog',dALog,envir=.GlobalEnv)
+			pos <- 1
+			assign('dALog',dALog,envir=as.environment(pos))
 
 			logisticmodel  <- nimbleCode({
 				theta[,] ~ dALog(r=r,z=z,m=m)
@@ -115,7 +115,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			set.seed(seed)
 			inits  <- list(r=rexp(1,1/0.01),m=runif(1,1,constants$z))
 			model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits)
-			assign('rALog',rALog,envir=.GlobalEnv)
+			assign('rALog',rALog,envir=as.environment(pos))
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('r')

@@ -36,7 +36,8 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		r ~ dnorm(mean=0,sd=0.05)
 	})
 
-	assign('dAoristicExponentialGrowth_vector',dAoristicExponentialGrowth_vector,envir=.GlobalEnv)
+	pos <- 1
+	assign('dAoristicExponentialGrowth_vector',dAoristicExponentialGrowth_vector,envir=as.environment(pos))
 
 	expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
 
@@ -48,7 +49,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	}
 	print('Compiling nimble model...')
 	suppressMessages(model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits[[1]]))
-	assign('rAoristicExponentialGrowth_vector',rAoristicExponentialGrowth_vector,envir=.GlobalEnv)
+	assign('rAoristicExponentialGrowth_vector',rAoristicExponentialGrowth_vector,envir=as.environment(pos))
 	suppressMessages(cModel <- compileNimble(model))
 	suppressMessages(conf <- configureMCMC(model))
 	if (!is.null(rSampler))
@@ -88,7 +89,8 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 							     return(exp(logProb))
 						     }
 					     })   
-			assign('dAExp',dAExp,envir=.GlobalEnv)
+			pos <- 1
+			assign('dAExp',dAExp,envir=as.environment(pos))
 
 			expmodel  <- nimbleCode({
 				theta[,] ~ dAExp(r=r,z=n.tblocks)
@@ -99,7 +101,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 			set.seed(seed)
 			inits  <- list(r=rnorm(1,0,0.05))
 			model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits)
-			assign('rAExp',rAExp,envir=.GlobalEnv)
+			assign('rAExp',rAExp,envir=as.environment(pos))
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('r')
