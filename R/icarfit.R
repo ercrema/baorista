@@ -43,11 +43,9 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		theta[,] ~ dAoristicGeneral_vector(p=p[1:n.tblocks])
 		for (i in 1:n.tblocks)
 		{
-# 			p[i]  <- lpseq[i]^2 / lpseqSS
 			p[i]  <- exp(lpseq[i]) / lpseqSS
 		}
 		lpseq[1:n.tblocks] ~ dcar_normal(adj[1:L], weights[1:L], num[1:n.tblocks], tau, zero_mean = 0)
-# 		lpseqSS  <- sum(lpseq[1:n.tblocks]^2)
 		lpseqSS  <- sum(exp(lpseq[1:n.tblocks]))
 		tau <- 1/sigma^2
 		sigma  ~ dexp(1)
@@ -83,7 +81,6 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		print('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,sigmaPrior,sigmaSampler)
 		{
-# 			require(nimble)
 			dAOG=nimbleFunction(run = function(x = double(2),p=double(1),log = integer(0))
 							       {
 								       returnType(double(0))
@@ -111,6 +108,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 				sigma  ~ dexp(1)
 			})
 			icarmodel <- gsub('dexp\\(1\\)', sigmaPrior, deparse(icarmodel)) |> parse(text=_)
+			set.seed(seed)
 			inits  <- list(sigma=rexp(1),lpseq=rnorm(constants$n.tblocks,0,0.5))
 			model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits)
 			assign('rAOG',rAOG,envir=.GlobalEnv)
@@ -120,7 +118,6 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 			if (!is.null(sigmaSampler))
 			{
 				suppressMessages(conf$removeSamplers('sigma'))
-				# 	sigmaSampler=list('sigma',type='slice')
 				do.call(conf$addSampler,sigmaSampler)
 			}
 			MCMC <- buildMCMC(conf)
@@ -131,7 +128,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
 		clusterEvalQ(cl,{library(nimble)})
-		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,sigmaPrior,sigmaSampler)
+		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,sigmaPrior=sigmaPrior,sigmaSampler=sigmaSampler)
 		stopCluster(cl)
 		results <- out
 	}

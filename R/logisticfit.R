@@ -83,9 +83,8 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 	if (parallel)
 	{
 		print('Running in parallel - progress bar will no be visualised')
-		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
+		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
 		{
-# 			require(nimble)
 			dALog=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
 						     returnType(double(0))
@@ -113,7 +112,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			logisticmodel <- gsub('rPrior', rPrior, deparse(logisticmodel)) 
 			logisticmodel <- gsub('mPrior', mPrior, logisticmodel) |> parse(text=_)
 
-			set.seed(seeds)
+			set.seed(seed)
 			inits  <- list(r=rexp(1,1/0.01),m=runif(1,1,constants$z))
 			model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits)
 			assign('rALog',rALog,envir=.GlobalEnv)
@@ -145,7 +144,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
 		clusterEvalQ(cl,{library(nimble)})
-		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior,rSampler)
+		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler,mPrior=mPrior,mSampler=mSampler)
 		stopCluster(cl)
 		results <- out
 	}

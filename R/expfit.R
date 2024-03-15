@@ -96,7 +96,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 			})
 
 			expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
-			set.seed(seeds)
+			set.seed(seed)
 			inits  <- list(r=rnorm(1,0,0.05))
 			model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits)
 			assign('rAExp',rAExp,envir=.GlobalEnv)
@@ -106,7 +106,6 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 			if (!is.null(rSampler))
 			{
 				suppressMessages(conf$removeSamplers('sigma'))
-				# 	rSampler=list('sigma',type='slice')
 				do.call(conf$addSampler,rSampler)
 			}
 			MCMC <- buildMCMC(conf)
@@ -117,7 +116,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
 		clusterEvalQ(cl,{library(nimble)})
-		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior,rSampler)
+		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler)
 		stopCluster(cl)
 		results <- out
 	}
