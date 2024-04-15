@@ -20,6 +20,8 @@
 
 expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm(mean=0,sd=0.05)',rSampler=NULL,parallel=FALSE,seeds=1:4)
 {
+	#Addresses R CMD Check NOTES
+	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- rAExp <- runfun <-  NULL
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
 
@@ -31,37 +33,56 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 
 	if (!parallel)
  	{
-	expmodel  <- nimbleCode({
-		theta[,] ~ dAoristicExponentialGrowth_vector(r=r,z=n.tblocks)
-		r ~ dnorm(mean=0,sd=0.05)
-	})
+		
+		dAExp=nimbleFunction(
+				     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
+					     returnType(double(0))
+					     t = 1:z
+					     n = numeric(z)
+					     for (i in 1:z)
+					     {
+						     n[i] = (1+r)^t[i]
+					     }
+					     p = n/sum(n)
+					     pg = x %*% p
+					     logProb = sum(log(pg))
+					     if(log) {
+						     return(logProb)
+					     } else {
+						     return(exp(logProb))
+					     }
+				     })   
+		pos <- 1
+		assign('dAExp',dAExp,envir=as.environment(pos))
 
-	pos <- 1
-	assign('dAoristicExponentialGrowth_vector',dAoristicExponentialGrowth_vector,envir=as.environment(pos))
+		expmodel  <- nimbleCode({
+			theta[,] ~ dAExp(r=r,z=n.tblocks)
+			r ~ dnorm(mean=0,sd=0.05)
+		})
 
-	expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
+		expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
 
-	inits  <- vector('list',length=nchains)
-	for (k in 1:nchains)
-	{
-		set.seed(seeds[k])
-		inits[[k]]  <- list(r=rnorm(1,0,0.05))
-	}
-	print('Compiling nimble model...')
-	suppressMessages(model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits[[1]]))
-	assign('rAoristicExponentialGrowth_vector',rAoristicExponentialGrowth_vector,envir=as.environment(pos))
-	suppressMessages(cModel <- compileNimble(model))
-	suppressMessages(conf <- configureMCMC(model))
-	if (!is.null(rSampler))
-	{
-		suppressMessages(conf$removeSamplers('r'))
-		# 	rSampler=list('sigma',type='slice')
-		suppressMessages(do.call(conf$addSampler,rSampler))
-	}
-	suppressMessages(conf$addMonitors('r'))
-	suppressMessages(MCMC <- buildMCMC(conf))
-	suppressMessages(cMCMC <- compileNimble(MCMC))
-	results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
+		inits  <- vector('list',length=nchains)
+		for (k in 1:nchains)
+		{
+			set.seed(seeds[k])
+			inits[[k]]  <- list(r=rnorm(1,0,0.05))
+		}
+		print('Compiling nimble model...')
+		suppressMessages(model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits[[1]]))
+		assign('rAExp',rAExp,envir=as.environment(pos))
+		suppressMessages(cModel <- compileNimble(model))
+		suppressMessages(conf <- configureMCMC(model))
+		if (!is.null(rSampler))
+		{
+			suppressMessages(conf$removeSamplers('r'))
+			# 	rSampler=list('sigma',type='slice')
+			suppressMessages(do.call(conf$addSampler,rSampler))
+		}
+		suppressMessages(conf$addMonitors('r'))
+		suppressMessages(MCMC <- buildMCMC(conf))
+		suppressMessages(cMCMC <- compileNimble(MCMC))
+		results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
 
  	}
 
@@ -70,6 +91,8 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		print('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
 		{
+
+			returnType <- nimStop <- nimMatrix <- dAExp <- rAExp <-  NULL
 # 			require(nimble)
 			dAExp=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {

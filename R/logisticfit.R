@@ -21,7 +21,8 @@
 
 logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dexp(1/0.001)',mPrior='dunif(1,z)',rSampler=NULL,mSampler=NULL,parallel=FALSE,seeds=1:4)
 {
-	m.raw <- NULL
+	#Addresses R CMD Check NOTES
+	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- rALog <- runfun <-  NULL
 	# Extract mid points
 	mids <- apply(x$tblocks,1,median)
 
@@ -36,47 +37,63 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 
 	if (!parallel)
  	{
-	logisticmodel  <- nimbleCode({
-		theta[,] ~ dAoristicLogisticGrowth_vector(r=r,z=z,m=m)
-		r ~ rPrior
-		m.raw ~ mPrior
-		m  <- round(m.raw)
-	})
-	pos <- 1
-	assign('dAoristicLogisticGrowth_vector',dAoristicLogisticGrowth_vector,envir=as.environment(pos))
+
+		dALog=nimbleFunction(
+				     run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
+					     returnType(double(0))
+					     t = 1:z
+					     n = 1/(1+exp(-r*(t-m)))
+					     p = n/sum(n)
+					     pg = x %*% p
+					     logProb = sum(log(pg))
+					     if(log) {
+						     return(logProb)
+					     } else {
+						     return(exp(logProb))
+					     }
+				     })   
+		pos <- 1
+		assign('dALog',dALog,envir=as.environment(pos))
+
+		logisticmodel  <- nimbleCode({
+			theta[,] ~ dALog(r=r,z=z,m=m)
+			r ~ rPrior
+			m.raw ~ mPrior
+			m  <- round(m.raw)
+		})
 
 
-	logisticmodel <- gsub('rPrior', rPrior, deparse(logisticmodel)) 
-	logisticmodel <- gsub('mPrior', mPrior, logisticmodel) |> parse(text=_)
+		logisticmodel <- gsub('rPrior', rPrior, deparse(logisticmodel)) 
+		logisticmodel <- gsub('mPrior', mPrior, logisticmodel) |> parse(text=_)
 
-	inits  <- vector('list',length=nchains)
-	for (k in 1:nchains)
-	{
-		set.seed(seeds[k])
-		inits[[k]]  <- list(r=rexp(1,1/0.01),m.raw=runif(1,1,constants$z))
-	}
-	print('Compiling nimble model...')
-	suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
-	assign('rAoristicLogisticGrowth_vector',rAoristicLogisticGrowth_vector,envir=as.environment(pos))
-	suppressMessages(cModel <- compileNimble(model))
-	suppressMessages(conf <- configureMCMC(model))
-	if (!is.null(rSampler))
-	{
-		suppressMessages(conf$removeSamplers('r'))
-		# 	rSampler=list('sigma',type='slice')
-		suppressMessages(do.call(conf$addSampler,rSampler))
-	}
+		inits  <- vector('list',length=nchains)
+		for (k in 1:nchains)
+		{
+			set.seed(seeds[k])
+			inits[[k]]  <- list(r=rexp(1,1/0.01),m.raw=runif(1,1,constants$z))
+		}
+		print('Compiling nimble model...')
+		suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
+		assign('rALog',rALog,envir=as.environment(pos))
+		suppressMessages(cModel <- compileNimble(model))
+		suppressMessages(conf <- configureMCMC(model))
+		if (!is.null(rSampler))
+		{
+			suppressMessages(conf$removeSamplers('r'))
+			# 	rSampler=list('sigma',type='slice')
+			suppressMessages(do.call(conf$addSampler,rSampler))
+		}
 
-	if (!is.null(mSampler))
-	{
-		suppressMessages(conf$removeSamplers('m.raw'))
-		suppressMessages(do.call(conf$addSampler,mSampler))
-	}
-	suppressMessages(conf$addMonitors('r'))
-	suppressMessages(conf$addMonitors('m'))
-	suppressMessages(MCMC <- buildMCMC(conf))
-	suppressMessages(cMCMC <- compileNimble(MCMC))
-	results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
+		if (!is.null(mSampler))
+		{
+			suppressMessages(conf$removeSamplers('m.raw'))
+			suppressMessages(do.call(conf$addSampler,mSampler))
+		}
+		suppressMessages(conf$addMonitors('r'))
+		suppressMessages(conf$addMonitors('m'))
+		suppressMessages(MCMC <- buildMCMC(conf))
+		suppressMessages(cMCMC <- compileNimble(MCMC))
+		results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
 
  	}
 
@@ -85,6 +102,8 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		print('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
 		{
+			#Addresses R CMD Check NOTES
+			returnType <- m.raw <- nimStop <- nimMatrix <- rALog <-  NULL
 			dALog=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
 						     returnType(double(0))
