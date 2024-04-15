@@ -1,4 +1,4 @@
-[![development version](https://img.shields.io/badge/devel%20version-0.1.0-lightblue.svg)](https://github.com/ercrema/baorista)
+[![development version](https://img.shields.io/badge/devel%20version-0.1.1-lightblue.svg)](https://github.com/ercrema/baorista)
 [![R-hub](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml/badge.svg)](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml)
 
 # baorista  <img src="/logo/logo.png" align="right" />
