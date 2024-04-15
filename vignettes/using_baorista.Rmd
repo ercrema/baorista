@@ -96,14 +96,12 @@ summary(exponential.fit)
 Alternatively values can be extracted directly:
 
 ```{r}
-#Compute 95% HPDI with coda package
+#Compute 90% HPDI with coda package
 library(coda)
-mcmc(exponential.fit$posterior.r) |> HPDinterval(prob=0.89)
-#Plot with  bayesplot package:
-library(bayesplot)
-library(ggplot2)
-plot_title <- ggtitle("Posterior of Growth Rate","with medians and 89% intervals")
-mcmc_areas(exponential.fit$posterior.r,prob=0.89) + plot_title
+mcmc(exponential.fit$posterior.r) |> HPDinterval(prob=0.90)
+
+#Plot histogram of posterior
+hist(exponential.fit$posterior.r[,1],xlab='r',main='Posterior of Growth Rate')
 ```
 
 A dedicated plot function can also be used to visualise the fitted exponential model:
