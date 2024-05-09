@@ -1,0 +1,16 @@
+c(
+		bibentry(bibtype   = "Manual",
+			title = "baorista (v.0.1.1): Bayesian Aoristic Analyses",
+			author = c(person("Enrico R.", "Crema")),
+			year = "2024",
+			url = "https://github.com/ercrema/baorista"
+			),
+		bibentry(bibtype = "Article",
+			title = "A Bayesian alternative for aoristic analyses in archaeology",
+			author   = c(person("Enrico R.", "Crema")),
+			journal = "Archaeometry",
+			year = "2024",
+			url = "https://doi.org/10.1111/arcm.12984",
+			doi      = "10.1111/arcm.12984"
+			)
+		)
