@@ -47,6 +47,9 @@
 
 \item{...}{Additional arguments affecting the plot.}
 }
+\value{
+No return value (plot function)
+}
 \description{
 Plot posterior estimates of \code{fittedICAR} class objects.
 }

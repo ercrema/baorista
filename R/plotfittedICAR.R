@@ -13,6 +13,7 @@
 #' @param plot.legend Logical indicating whether to display a legend or not (default is TRUE).
 #' @param legend.arg List containing arguments to be directed to the \code{legend()} function.
 #' @param ... Additional arguments affecting the plot.
+#' @return No return value (plot function)
 #' @method plot fittedICAR
 #' @import graphics
 #' @export

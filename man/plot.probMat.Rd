@@ -38,6 +38,9 @@
 
 \item{...}{Additional arguments affecting the plot.}
 }
+\value{
+No return value (plot function)
+}
 \description{
 Plot summed probabilities of aoristic weights.
 }
