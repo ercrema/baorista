@@ -73,7 +73,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		{
 			inits[[k]]  <- list(sigma=rexp(1),lpseq=rnorm(constants$n.tblocks,0,0.5))
 		}
-		print('Compiling nimble model...')
+		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits[[1]]))
 		assign('rAOG',rAOG,envir=as.environment(pos))
 		suppressMessages(cModel <- compileNimble(model))
@@ -94,7 +94,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 	if (parallel)
 	{
 		# Addresses R CMD Check NOTES
-		print('Running in parallel - progress bar will no be visualised')
+		message('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,sigmaPrior,sigmaSampler)
 		{
 

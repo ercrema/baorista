@@ -72,7 +72,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			set.seed(seeds[k])
 			inits[[k]]  <- list(r=rexp(1,1/0.01),m.raw=runif(1,1,constants$z))
 		}
-		print('Compiling nimble model...')
+		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
 		assign('rALog',rALog,envir=as.environment(pos))
 		suppressMessages(cModel <- compileNimble(model))
@@ -99,7 +99,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 
 	if (parallel)
 	{
-		print('Running in parallel - progress bar will no be visualised')
+		message('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
 		{
 			#Addresses R CMD Check NOTES
