@@ -22,6 +22,9 @@
 
 icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='dexp(1)',sigmaSampler=NULL,parallel=FALSE,seeds=1:4)
 {
+	#Handle cleaning of GlobalEnv on exit
+	envobj <- ls(envir=.GlobalEnv)
+	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	# Addresses R CMD Check NOTES
 	returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- dAOG <- rAOG <- NULL
 

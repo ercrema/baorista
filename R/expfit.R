@@ -20,6 +20,9 @@
 
 expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm(mean=0,sd=0.05)',rSampler=NULL,parallel=FALSE,seeds=1:4)
 {
+	#Handle cleaning of GlobalEnv on exit
+	envobj <- ls(envir=.GlobalEnv)
+	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
 	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- rAExp <- runfun <-  NULL
 	# Initial Warnings
@@ -83,7 +86,6 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		suppressMessages(MCMC <- buildMCMC(conf))
 		suppressMessages(cMCMC <- compileNimble(MCMC))
 		results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
-		rm(rAExp,dAExp,envir=.GlobalEnv) #clean temporary objects from GlobalEnv
  	}
 
 	if (parallel)
@@ -152,6 +154,10 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
  	posterior.r  <- posterior.r/x$resolution #scale to match resolution
 	results  <- list(x=x,posterior.r=posterior.r,rhat=rhat,ess=ess)
 	class(results)  <- c('fittedExp',class(results))
+	
+	envobj.current <- ls(envir=.GlobalEnv)
+	toremove  <- envobj.current[which(!envobj.current%in%envobj)]
+	rm(list=toremove,envir=.GlobalEnv)
 	return(results)
 }
 

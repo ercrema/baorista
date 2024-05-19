@@ -31,7 +31,7 @@ This documents provides a short guide for the key steps required to setup datase
 
 ## Installing and loading the _baorista_ package
 
-_Baorista_ is currently not available on CRAN but can be installed via `devtools` directly from this repository with the following command:
+Stable version of _Baorista_ is available directly on CRAN while development version can be installed via `devtools` with the following command:
 
 ```{r,eval=F}
 library(devtools)

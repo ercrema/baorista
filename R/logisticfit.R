@@ -21,6 +21,9 @@
 
 logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dexp(1/0.001)',mPrior='dunif(1,z)',rSampler=NULL,mSampler=NULL,parallel=FALSE,seeds=1:4)
 {
+	#Handle cleaning of GlobalEnv on exit
+	envobj <- ls(envir=.GlobalEnv)
+	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
 	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- rALog <- runfun <-  NULL
 	# Extract mid points
