@@ -15,6 +15,6 @@ Sample datasets to illustrate data formats required for \code{createProbMat()}.
 }
 \examples{
 data(sampledf)
-x  <- createProbMat(x=sample.df,timeRange = c(6500,4001),resolution= 100)
+x  <- createProbMat(x=sampledf,timeRange = c(6500,4001),resolution= 100)
 }
 \keyword{datasets}

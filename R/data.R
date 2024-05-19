@@ -3,7 +3,7 @@
 #' @format A data.frame class object with two columns defining the start and the end of each even (\code{sample.df}) 
 #' @examples
 #' data(sampledf)
-#' x  <- createProbMat(x=sample.df,timeRange = c(6500,4001),resolution= 100)
+#' x  <- createProbMat(x=sampledf,timeRange = c(6500,4001),resolution= 100)
 "sampledf"
 
 #' @title Sample aoristic data (matrix)
