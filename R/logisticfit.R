@@ -94,6 +94,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		suppressMessages(MCMC <- buildMCMC(conf))
 		suppressMessages(cMCMC <- compileNimble(MCMC))
 		results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
+		rm(dALog,rALog,envir=.GlobalEnv) #clean temporary objects from GlobalEnv
 
  	}
 
