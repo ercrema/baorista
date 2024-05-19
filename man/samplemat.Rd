@@ -14,10 +14,8 @@ samplemat
 Sample datasets to illustrate data formats required for \code{createProbMat()}.
 }
 \examples{
-\dontrun{
 data(samplemat)
 x <- createProbMat(pmat=samplemat,timeRange = c(5000,3001),resolution=100)
 plot(x)
-}
 }
 \keyword{datasets}
