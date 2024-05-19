@@ -21,6 +21,8 @@
 
 plot.fittedICAR <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL,...)
 {
+	oldpar <- par(no.readonly = TRUE)
+	on.exit(par(oldpar))
 	midPoints  <- apply(x$x$tblocks,1,median)
 	scl  <- diff(pretty(midPoints))[1]
 	minortick <- ifelse(is.null(minortick),round(scl/5),minortick)
