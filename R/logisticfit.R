@@ -21,6 +21,9 @@
 
 logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dexp(1/0.001)',mPrior='dunif(1,z)',rSampler=NULL,mSampler=NULL,parallel=FALSE,seeds=1:4)
 {
+	#Handle cleaning of GlobalEnv on exit
+	envobj <- ls(envir=.GlobalEnv)
+	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
 	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- rALog <- runfun <-  NULL
 	# Extract mid points
@@ -72,7 +75,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			set.seed(seeds[k])
 			inits[[k]]  <- list(r=rexp(1,1/0.01),m.raw=runif(1,1,constants$z))
 		}
-		print('Compiling nimble model...')
+		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
 		assign('rALog',rALog,envir=as.environment(pos))
 		suppressMessages(cModel <- compileNimble(model))
@@ -94,12 +97,13 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		suppressMessages(MCMC <- buildMCMC(conf))
 		suppressMessages(cMCMC <- compileNimble(MCMC))
 		results <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,inits=inits,samplesAsCodaMCMC = T,nchains=nchains,progressBar=TRUE,setSeed=seeds)
+		rm(dALog,rALog,envir=.GlobalEnv) #clean temporary objects from GlobalEnv
 
  	}
 
 	if (parallel)
 	{
-		print('Running in parallel - progress bar will no be visualised')
+		message('Running in parallel - progress bar will no be visualised')
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
 		{
 			#Addresses R CMD Check NOTES

@@ -11,6 +11,7 @@
 #' @param minortick Interval for minor ticks in the x-axis label. Default is estimated based on timescale
 #' @param add if set to \code{TRUE} adds the line and point graph on existing plot.
 #' @param ... Additional arguments affecting the plot.
+#' @return No return value (plot function)
 #' @method plot probMat
 #' @export  
 
