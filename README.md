@@ -3,12 +3,7 @@
 [![R-hub](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml/badge.svg)](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml)
 
 # baorista  <img src="/logo/logo.png" align="right" />
-_baorista_ is an R package that provides a Bayesian inferential tool for analysing time-frequencies of archaeological events associated with time spans typically obtained from relative chronological sequences (e.g. periods and phases) and often analyses using aoristic sums. At its core _baorista_ is a frontend for fitting Bayesian models via the [NIMBLE probabilistic programming language](https://r-nimble.org/). The package is currently in beta development and can be installed using `devtools`:
-
-```
-library(devtools)
-install_github('ercrema/baorista')
-```
+_baorista_ is an R package that provides a Bayesian inferential tool for analysing time-frequencies of archaeological events associated with time spans typically obtained from relative chronological sequences (e.g. periods and phases) and often analyses using aoristic sums. At its core _baorista_ is a frontend for fitting Bayesian models via the [NIMBLE probabilistic programming language](https://r-nimble.org/). 
 
 Please note that baorista is based on Nimble, which requires a working C++ compiler. For more information please read the [dedicated section of the nimble manual](https://r-nimble.org/html_manual/cha-installing-nimble.html#sec:compiler).
 
