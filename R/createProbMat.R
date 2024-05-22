@@ -17,7 +17,8 @@ createProbMat <- function(x=NULL,pmat=NULL,timeRange=NULL,resolution=NULL)
 	if (is.null(timeRange))	{stop("timeRange not provided.")}
 	if (is.null(resolution)) {stop("resolution not provided.")}
 	if (length(timeRange)!=2 | timeRange[1]<timeRange[2]){stop("Incorrect format of timeRange argument")}
-	if (!is.null(pmat)){if (any(apply(pmat,1,sum)!=1)){stop("Sum of event probabilities are not always equal to 1")}}
+# 	if (!is.null(pmat)){if (any(apply(pmat,1,sum)!=1)){stop("Sum of event probabilities are not always equal to 1")}}
+	if (!is.null(pmat)){if (any(!sapply(apply(pmat,1,sum),identical,1))){stop("Sum of event probabilities are not always equal to 1")}}
 	starts  <- seq(from=timeRange[1],to=timeRange[2],-resolution)
 	ends  <- seq(from=timeRange[1]-resolution + 1, to=timeRange[2],-resolution) 
 	if (length(starts)!=length(ends)){stop("resolution does not break timeRange in equally sized time blocks")}
