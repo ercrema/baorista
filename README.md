@@ -1,5 +1,5 @@
 [![cran version](http://www.r-pkg.org/badges/version/baorista)](https://CRAN.R-project.org/package=baorista) 
-[![development version](https://img.shields.io/badge/devel%20version-0.1.3-lightblue.svg)](https://github.com/ercrema/baorista)
+[![development version](https://img.shields.io/badge/devel%20version-0.1.4-lightblue.svg)](https://github.com/ercrema/baorista)
 [![R-hub](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml/badge.svg)](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml)
 
 # baorista  <img src="/logo/logo.png" align="right" />

@@ -26,7 +26,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 	envobj <- ls(envir=.GlobalEnv)
 	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	# Addresses R CMD Check NOTES
-	returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- dAOG <- rAOG <- NULL
+	returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- dAOG <-rAOG <-  NULL
 
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
@@ -55,8 +55,17 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 						    return(exp(logProb))
 					    }
 				    })   
+
+		rAOG=nimbleFunction(
+				     run = function(n=integer(0),p=double(1)) {
+					     returnType(double(2))
+					     nimStop("user-defined distribution dAExp provided without random generation function.")
+					     x <- nimMatrix()
+					     return(x)
+				     })
 		pos <- 1
 		assign('dAOG',dAOG,envir=as.environment(pos))
+		assign('rAOG',rAOG,envir=as.environment(pos))
 
 		icarmodel  <- nimbleCode({
 			theta[,] ~ dAOG(p=p[1:n.tblocks])
@@ -78,7 +87,6 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		}
 		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits[[1]]))
-		assign('rAOG',rAOG,envir=as.environment(pos))
 		suppressMessages(cModel <- compileNimble(model))
 		suppressMessages(conf <- configureMCMC(model))
 		if (!is.null(sigmaSampler))
@@ -114,8 +122,16 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 									       return(exp(logProb))
 								       }
 							       })   
+			rAOG=nimbleFunction(
+					    run = function(n=integer(0),p=double(1)) {
+						    returnType(double(2))
+						    nimStop("user-defined distribution dAExp provided without random generation function.")
+						    x <- nimMatrix()
+						    return(x)
+					    })
 			pos <- 1
 			assign('dAOG',dAOG,envir=as.environment(pos))
+			assign('rAOG',rAOG,envir=as.environment(pos))
 
 			icarmodel  <- nimbleCode({
 				theta[,] ~ dAOG(p=p[1:n.tblocks])
@@ -134,7 +150,6 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 			set.seed(seed)
 			inits  <- list(sigma=rexp(1),lpseq=rnorm(constants$n.tblocks,0,0.5))
 			model  <- nimbleModel(icarmodel,constants=constants,data=d,inits=inits)
-			assign('rAOG',rAOG,envir=as.environment(pos))
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('p')

@@ -25,7 +25,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 	envobj <- ls(envir=.GlobalEnv)
 	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
-	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- rALog <- runfun <-  NULL
+	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- runfun <- dALog <- rALog <-  NULL
 	# Extract mid points
 	mids <- apply(x$tblocks,1,median)
 
@@ -55,8 +55,17 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 						     return(exp(logProb))
 					     }
 				     })   
+
+		rALog=nimbleFunction(
+				     run = function(n=integer(0),z=integer(0),r=double(0),m=integer(0)) {
+					     returnType(double(2))
+					     nimStop("user-defined distribution dAExp provided without random generation function.")
+					     x <- nimMatrix()
+					     return(x)
+				     })
 		pos <- 1
 		assign('dALog',dALog,envir=as.environment(pos))
+		assign('rALog',rALog,envir=as.environment(pos))
 
 		logisticmodel  <- nimbleCode({
 			theta[,] ~ dALog(r=r,z=z,m=m)
@@ -77,7 +86,6 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		}
 		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
-		assign('rALog',rALog,envir=as.environment(pos))
 		suppressMessages(cModel <- compileNimble(model))
 		suppressMessages(conf <- configureMCMC(model))
 		if (!is.null(rSampler))
@@ -107,7 +115,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
 		{
 			#Addresses R CMD Check NOTES
-			returnType <- m.raw <- nimStop <- nimMatrix <- rALog <-  NULL
+			returnType <- m.raw <- nimStop <- nimMatrix <-  dALog <- rALog <- NULL
 			dALog=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
 						     returnType(double(0))
@@ -122,8 +130,16 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 							     return(exp(logProb))
 						     }
 					     })   
+			rALog=nimbleFunction(
+					     run = function(n=integer(0),z=integer(0),r=double(0),m=integer(0)) {
+						     returnType(double(2))
+						     nimStop("user-defined distribution dAExp provided without random generation function.")
+						     x <- nimMatrix()
+						     return(x)
+					     })
 			pos <- 1
 			assign('dALog',dALog,envir=as.environment(pos))
+			assign('rALog',rALog,envir=as.environment(pos))
 
 			logisticmodel  <- nimbleCode({
 				theta[,] ~ dALog(r=r,z=z,m=m)
@@ -138,7 +154,6 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			set.seed(seed)
 			inits  <- list(r=rexp(1,1/0.01),m=runif(1,1,constants$z))
 			model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits)
-			assign('rALog',rALog,envir=as.environment(pos))
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('r')
