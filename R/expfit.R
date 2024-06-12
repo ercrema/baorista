@@ -24,7 +24,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	envobj <- ls(envir=.GlobalEnv)
 	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
-	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- rAExp <- runfun <-  NULL
+	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- runfun <-  NULL
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
 
@@ -94,7 +94,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
 		{
 
-			returnType <- nimStop <- nimMatrix <- dAExp <- rAExp <-  NULL
+			returnType <- nimStop <- nimMatrix <- dAExp <-  NULL
 # 			require(nimble)
 			dAExp=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {

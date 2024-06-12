@@ -25,7 +25,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 	envobj <- ls(envir=.GlobalEnv)
 	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
-	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- rALog <- runfun <-  NULL
+	returnType <- m.raw <- nimStop <- nimMatrix <- rAoristicLogisticGrowth_vector <- runfun <-  NULL
 	# Extract mid points
 	mids <- apply(x$tblocks,1,median)
 
@@ -107,7 +107,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
 		{
 			#Addresses R CMD Check NOTES
-			returnType <- m.raw <- nimStop <- nimMatrix <- rALog <-  NULL
+			returnType <- m.raw <- nimStop <- nimMatrix <-  NULL
 			dALog=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0),m=integer(0), log = integer(0)) {
 						     returnType(double(0))

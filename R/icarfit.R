@@ -26,7 +26,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 	envobj <- ls(envir=.GlobalEnv)
 	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	# Addresses R CMD Check NOTES
-	returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- dAOG <- rAOG <- NULL
+	returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- dAOG <- NULL
 
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
@@ -102,7 +102,7 @@ icarfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,sigmaPrior='
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,sigmaPrior,sigmaSampler)
 		{
 
-			returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- rAoristicGeneral_vector <- dAOG <- rAOG <- NULL
+			returnType <- n.tblocks  <- lpseq <- sigma <- nimStop <- nimMatrix <- rAoristicGeneral_vector <- dAOG <- NULL
 			dAOG=nimbleFunction(run = function(x = double(2),p=double(1),log = integer(0))
 							       {
 								       returnType(double(0))
