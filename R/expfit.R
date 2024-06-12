@@ -24,7 +24,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	envobj <- ls(envir=.GlobalEnv)
 	on.exit(rm(list=ls(envir=.GlobalEnv)[which(!ls(envir=.GlobalEnv)%in%envobj)],envir=.GlobalEnv))
 	#Addresses R CMD Check NOTES
-	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- runfun <-  NULL
+	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- rAExp <- runfun <-  NULL
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
 
@@ -55,8 +55,17 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 						     return(exp(logProb))
 					     }
 				     })   
+		rAExp=nimbleFunction(
+				     run = function(n=integer(0),z=integer(0),r=double(0)) {
+					     returnType(double(2))
+					     nimStop("user-defined distribution dAExp provided without random generation function.")
+					     x <- nimMatrix()
+					     return(x)
+				     })
 		pos <- 1
 		assign('dAExp',dAExp,envir=as.environment(pos))
+		assign('rAExp',rAExp,envir=as.environment(pos))
+		
 
 		expmodel  <- nimbleCode({
 			theta[,] ~ dAExp(r=r,z=n.tblocks)
@@ -73,7 +82,6 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		}
 		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits[[1]]))
-		assign('rAExp',rAExp,envir=as.environment(pos))
 		suppressMessages(cModel <- compileNimble(model))
 		suppressMessages(conf <- configureMCMC(model))
 		if (!is.null(rSampler))
@@ -94,7 +102,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
 		{
 
-			returnType <- nimStop <- nimMatrix <- dAExp <-  NULL
+			returnType <- nimStop <- nimMatrix <- dAExp <- rAExp <-  NULL
 # 			require(nimble)
 			dAExp=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
@@ -114,8 +122,17 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 							     return(exp(logProb))
 						     }
 					     })   
+
+			rAExp=nimbleFunction(
+					     run = function(n=integer(0),z=integer(0),r=double(0)) {
+						     returnType(double(2))
+						     nimStop("user-defined distribution dAExp provided without random generation function.")
+						     x <- nimMatrix()
+						     return(x)
+					     })
 			pos <- 1
 			assign('dAExp',dAExp,envir=as.environment(pos))
+			assign('rAExp',rAExp,envir=as.environment(pos))
 
 			expmodel  <- nimbleCode({
 				theta[,] ~ dAExp(r=r,z=n.tblocks)
@@ -126,7 +143,6 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 			set.seed(seed)
 			inits  <- list(r=rnorm(1,0,0.05))
 			model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits)
-			assign('rAExp',rAExp,envir=as.environment(pos))
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('r')
