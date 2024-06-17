@@ -1,6 +1,7 @@
 [![cran version](http://www.r-pkg.org/badges/version/baorista)](https://CRAN.R-project.org/package=baorista) 
 [![development version](https://img.shields.io/badge/devel%20version-0.1.4-lightblue.svg)](https://github.com/ercrema/baorista)
 [![R-hub](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml/badge.svg)](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/baorista)](https://cran.r-project.org/package=baorista)
 
 # baorista  <img src="/logo/logo.png" align="right" />
 _baorista_ is an R package that provides a Bayesian inferential tool for analysing time-frequencies of archaeological events associated with time spans typically obtained from relative chronological sequences (e.g. periods and phases) and often analyses using aoristic sums. At its core _baorista_ is a frontend for fitting Bayesian models via the [NIMBLE probabilistic programming language](https://r-nimble.org/). 
