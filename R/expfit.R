@@ -14,7 +14,7 @@
 #' @import nimble
 #' @import coda
 #' @import parallel
-#' @importFrom stats rnorm
+#' @importFrom stats runif rexp rchisq rt rlnorm rweibull rnorm rgamma rlogis rbeta rt rlnorm
 #' @export
 
 
@@ -28,8 +28,8 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
 	# Check prior definitions
-	supported.distributions  <- data.frame(d=c('dnorm','dexp','dbeta','dchisq','dgamma','dlogis','dunif','dt','dweib','dlnorm'),r=c('rnorm','rexp','rbeta','rchisq','rgamma','rlogis','runf','rt','rweibull','rlnorm'))
-	if(!sub("\\(.*","",rPrior)%in%supported.distributions$d){stop(paste0('Unsupported distribution in prior definition. Please use one of the following: ',paste(supported.distributions$d,collapse=', '))}
+	supported.distributions  <- data.frame(d=c('dnorm','dexp','dbeta','dchisq','dgamma','dlogis','dunif','dt','dweib','dlnorm'),r=c('rnorm','rexp','rbeta','rchisq','rgamma','rlogis','runif','rt','rweibull','rlnorm'))
+	if(!sub("\\(.*","",rPrior)%in%supported.distributions$d){stop(paste0('Unsupported distribution in prior definition. Please use one of the following: ',paste(supported.distributions$d,collapse=', ')))}
 	rPrior.rand1  <- supported.distributions$r[supported.distributions$d==strsplit(rPrior,"\\(")[[1]][1]]
 	rPrior.rand2 <- gsub("\\)","",strsplit(rPrior,"\\(")[[1]][2])
 	rPrior.rand <- paste0(rPrior.rand1,"(n=1,",rPrior.rand2,")")
@@ -93,7 +93,6 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		if (!is.null(rSampler))
 		{
 			suppressMessages(conf$removeSamplers('r'))
-			# 	rSampler=list('sigma',type='slice')
 			suppressMessages(do.call(conf$addSampler,rSampler))
 		}
 		suppressMessages(conf$addMonitors('r'))
@@ -105,11 +104,10 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	if (parallel)
 	{
 		message('Running in parallel - progress bar will no be visualised')
-		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
+		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rPrior.rand,rSampler)
 		{
 
 			returnType <- nimStop <- nimMatrix <- dAExp <- rAExp <-  NULL
-# 			require(nimble)
 			dAExp=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
 						     returnType(double(0))
@@ -147,14 +145,14 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 
 			expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
 			set.seed(seed)
-			inits  <- list(r=rnorm(1,0,0.05))
+			inits  <- list(r=eval(parse(text=rPrior.rand)))
 			model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits)
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('r')
 			if (!is.null(rSampler))
 			{
-				suppressMessages(conf$removeSamplers('sigma'))
+				suppressMessages(conf$removeSamplers('r'))
 				do.call(conf$addSampler,rSampler)
 			}
 			MCMC <- buildMCMC(conf)
@@ -165,7 +163,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
 		clusterEvalQ(cl,{library(nimble)})
-		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler)
+		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler,rPrior.rand=rPrior.rand)
 		stopCluster(cl)
 		results <- out
 	}
