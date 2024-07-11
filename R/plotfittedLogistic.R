@@ -52,12 +52,13 @@ plot.fittedLogistic <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=N
 	z  <- ncol(x$x$pmat)
 	r  <- x$posterior.r
 	m.index  <- x$posterior.m.index
+	m  <- x$posterior.m
 	n.post <- length(r)
 	post.mat  <- matrix(NA,nrow=n.post,ncol=length(a:b))
 	for (i in 1:nrow(post.mat))
 	{
-		t  <-  1:z
-		n  <-  1/(1+exp(-r[i]*(t-m.index[i])))
+		t  <-  1:(length(a:b))
+		n  <-  1/(1+exp(-r[i]*(t-m[i])))
 		post.mat[i,]  <-  n/sum(n)
 	}
 
