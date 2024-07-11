@@ -6,7 +6,7 @@
 \usage{
 expfit(
   x,
-  niter = 1e+05,
+  niter = 100000,
   nburnin = 50000,
   thin = 10,
   nchains = 4,

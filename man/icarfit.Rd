@@ -6,7 +6,7 @@
 \usage{
 icarfit(
   x,
-  niter = 1e+05,
+  niter = 100000,
   nburnin = 50000,
   thin = 10,
   nchains = 4,
@@ -27,7 +27,7 @@ icarfit(
 
 \item{nchains}{Number of MCMC chains}
 
-\item{sigmaPrior}{A string defining prior for the sigma parameter. Default is 'dexp(1)'.}
+\item{sigmaPrior}{A string defining prior for the sigma parameter. Default is 'dexp(rate=1)'.}
 
 \item{sigmaSampler}{A list containing settings for the MCMC sampler. Default is null and employs nimble's Default sampler (RW sampler).}
 
