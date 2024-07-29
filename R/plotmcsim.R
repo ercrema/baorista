@@ -18,8 +18,8 @@
 #' @param ... Additional arguments affecting the plot.
 #' @return No return value (plot function)
 #' @method plot mcsimres
-#' @import coda
 #' @import graphics
+#' @importFrom stats quantile
 #' @export
 
 
