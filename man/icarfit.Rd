@@ -6,7 +6,7 @@
 \usage{
 icarfit(
   x,
-  niter = 100000,
+  niter = 1e+05,
   nburnin = 50000,
   thin = 10,
   nchains = 4,
