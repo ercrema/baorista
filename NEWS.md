@@ -2,6 +2,7 @@
  * Fixed bug on logistic growth model plot function
  * Fixed bug on prior definition for exponential growth model
  * Added NEW double exponential model and related plot function
+ * Added NEW Monte-Carlo simulation function
  * Updated parameter initialisation routine in all model. Initial values for MCMC are drawn from the prior distribution.
 
 # Version 0.1.4
