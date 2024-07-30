@@ -12,7 +12,7 @@ mcsim(x, nsim = 1000)
 \item{nsim}{Number of Monte-Carlo simulations}
 }
 \value{
-An objcect of class \code{mcsimres} containing relevant metadata and a matrix with the number of events per time-block per Monte-Carlo simulation.
+An object of class \code{mcsimres} containing relevant metadata and a matrix with the number of events per time-block per Monte-Carlo simulation.
 }
 \description{
 Samples multiple sets of random dates from aoristic weights
