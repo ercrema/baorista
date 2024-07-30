@@ -1,6 +1,6 @@
-#' @title Plot logistic model fitted to aoristic data
-#' @description Plot posterior estimates of \code{fittedLogistic} class objects.
-#' @param x An \code{fittedExp} class object
+#' @title Plot double exponential  model fitted to aoristic data
+#' @description Plot posterior estimates of \code{fittedDExp} class objects.
+#' @param x An \code{fittedDExp} class object
 #' @param hpd A vector with two values defining the highest posterior density interval to display. Default is 0.5 and 0.9.
 #' @param minortick Interval for minor ticks in the x-axis label. Default is estimated based on timescale.
 #' @param ylim Limits of the y-axis. Default estimated from posterior ranges.
@@ -17,12 +17,12 @@
 #' @param legend.arg List containing arguments to be directed to the \code{legend()} function.
 #' @param ... Additional arguments affecting the plot.
 #' @return No return value (plot function)
-#' @method plot fittedLogistic
+#' @method plot fittedDExp
 #' @import coda
 #' @import graphics
 #' @export
 
-plot.fittedLogistic <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col='black',lwd=1,lty=2,col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL,...)
+plot.fittedDExp <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=NULL,ylab='Probability Mass',calendar='BP',col='black',lwd=1,lty=2,col1='steelblue',col2='lightblue',pch=20,plot.legend=TRUE,legend.arg=NULL,...)
 {
 	oldpar <- par(no.readonly = TRUE)
 	on.exit(par(oldpar))
@@ -50,15 +50,28 @@ plot.fittedLogistic <- function(x,hpd=c(0.5,0.9),minortick=NULL,ylim=NULL,xlab=N
 	a  <- x$x$timeRange[1]
 	b  <- x$x$timeRange[2]
 	z  <- ncol(x$x$pmat)
-	r  <- x$posterior.r
-	m.index  <- x$posterior.m.index
-	m  <- x$posterior.m
-	n.post <- length(r)
+	r1  <- x$posterior.r1
+	r2  <- x$posterior.r2
+	eta.index  <- x$posterior.eta.index
+	eta  <- round(x$posterior.eta)
+	n.post <- length(r1)
 	post.mat  <- matrix(NA,nrow=n.post,ncol=length(a:b))
 	for (i in 1:nrow(post.mat))
 	{
-		t  <-  1:(length(a:b))
-		n  <-  1/(1+exp(-r[i]*(t-m[i])))
+		t1  <-  1:(a-eta[i])
+		t2  <- 1:abs(b-eta[i]-1)
+		n1  <- numeric(length(t1))
+		n2  <- numeric(length(t2))
+		for (j in t1)
+		{
+			n1[j]  <- (1+r1[i])^j
+		}
+		for (j in t2)
+		{
+			n2[j]  <- ((1+r1[i])^abs(b-eta[i])) * (1+r2[i])^j
+		}
+
+		n = c(n1,n2)
 		post.mat[i,]  <-  n/sum(n)
 	}
 

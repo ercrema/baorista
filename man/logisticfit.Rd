@@ -10,8 +10,8 @@ logisticfit(
   nburnin = 50000,
   thin = 10,
   nchains = 4,
-  rPrior = "dexp(1/0.001)",
-  mPrior = "dunif(1,z)",
+  rPrior = "dexp(rate=1/0.001)",
+  mPrior = "dunif(min=1,max=z)",
   rSampler = NULL,
   mSampler = NULL,
   parallel = FALSE,
@@ -48,5 +48,5 @@ A \code{fittedLogistic} class object containing the original ProbMat class objec
 Fits an exponential growth model to \code{ProbMat} class objects.
 }
 \details{
-The function fits a discrete bounded logistic growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of two parameters, a growth rate (r) and a midpoint (m) defining the inflection point of the growth curve. Priors of the two parameters can be defined by the arguments \code{rPrior} and \code{mPrior}. In the latter case the object \code{z} is a placeholder for the number of blocks (e.g. the default 'dunif(1,z)` is a uniform across all blocks). Priors are defined by character strings following the syntax used by nimble. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.
+The function fits a discrete bounded logistic growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of two parameters, a growth rate (r) and a midpoint (m) defining the inflection point of the growth curve. Priors of the two parameters can be defined by the arguments \code{rPrior} and \code{mPrior}. In the latter case the object \code{z} is a placeholder for the number of blocks (e.g. the default 'dunif(1,z)` is a uniform across all blocks). Priors are defined by character strings following the syntax used by nimble. The distribution parameters defined in \code{rPrior} and \code{mPrior} are also used to generate initialisation values for the MCMC. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.
 }

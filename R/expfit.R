@@ -9,12 +9,12 @@
 #' @param rSampler A list containing settings for the MCMC sampler. Default is null and employs nimble's Default sampler (RW sampler).
 #' @param parallel Logical specifying whether the chains should be run in parallel or not.
 #' @param seeds Random seed for each chain. Default is 1:4.
-#' @details The function fits a discrete bounded exponential growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of a single growth rate parameter (r), and users can define suitable priors using character strings for the argument \code{rPrior} (for details on how this should be specified please consult the nimble manual). Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.  
+#' @details The function fits a discrete bounded exponential growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of a single growth rate parameter (r), and users can define suitable priors using character strings for the argument \code{rPrior} (for details on how this should be specified please consult the nimble manual). The distribution parameters defined in \code{rPrior} is also used to generate initialisation values for the MCMC. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.  
 #' @return A \code{fittedExp} class object containing the original ProbMat class object, posterior of the growth rate, along with its Gelman Rubin statistic and effective sample sizes. 
 #' @import nimble
 #' @import coda
 #' @import parallel
-#' @importFrom stats rnorm
+#' @importFrom stats runif rexp rchisq rt rlnorm rweibull rnorm rgamma rlogis rbeta rt rlnorm
 #' @export
 
 
@@ -27,6 +27,12 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	returnType <- m.raw <- nimStop <- nimMatrix <-  dAExp <- rAExp <- runfun <-  NULL
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
+	# Check prior definitions
+	supported.distributions  <- data.frame(d=c('dnorm','dexp','dbeta','dchisq','dgamma','dlogis','dunif','dt','dweib','dlnorm'),r=c('rnorm','rexp','rbeta','rchisq','rgamma','rlogis','runif','rt','rweibull','rlnorm'))
+	if(!sub("\\(.*","",rPrior)%in%supported.distributions$d){stop(paste0('Unsupported distribution in prior definition. Please use one of the following: ',paste(supported.distributions$d,collapse=', ')))}
+	rPrior.rand1  <- supported.distributions$r[supported.distributions$d==strsplit(rPrior,"\\(")[[1]][1]]
+	rPrior.rand2 <- gsub("\\)","",strsplit(rPrior,"\\(")[[1]][2])
+	rPrior.rand <- paste0(rPrior.rand1,"(n=1,",rPrior.rand2,")")
 
 	# Define Data
 	d  <- list(theta=x$pmat)
@@ -69,16 +75,16 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 
 		expmodel  <- nimbleCode({
 			theta[,] ~ dAExp(r=r,z=n.tblocks)
-			r ~ dnorm(mean=0,sd=0.05)
+			r ~ rPrior
 		})
 
-		expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
+		expmodel <- gsub('rPrior', rPrior, deparse(expmodel)) |> parse(text=_)
 
 		inits  <- vector('list',length=nchains)
 		for (k in 1:nchains)
 		{
 			set.seed(seeds[k])
-			inits[[k]]  <- list(r=rnorm(1,0,0.05))
+			inits[[k]]  <- list(r=eval(parse(text=rPrior.rand)))
 		}
 		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits[[1]]))
@@ -87,7 +93,6 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		if (!is.null(rSampler))
 		{
 			suppressMessages(conf$removeSamplers('r'))
-			# 	rSampler=list('sigma',type='slice')
 			suppressMessages(do.call(conf$addSampler,rSampler))
 		}
 		suppressMessages(conf$addMonitors('r'))
@@ -99,11 +104,10 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 	if (parallel)
 	{
 		message('Running in parallel - progress bar will no be visualised')
-		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler)
+		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rPrior.rand,rSampler)
 		{
 
 			returnType <- nimStop <- nimMatrix <- dAExp <- rAExp <-  NULL
-# 			require(nimble)
 			dAExp=nimbleFunction(
 					     run = function(x = double(2),z=integer(0),r=double(0), log = integer(0)) {
 						     returnType(double(0))
@@ -141,14 +145,14 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 
 			expmodel <- gsub('dnorm\\(mean=0,sd=0.05\\)', rPrior, deparse(expmodel)) |> parse(text=_)
 			set.seed(seed)
-			inits  <- list(r=rnorm(1,0,0.05))
+			inits  <- list(r=eval(parse(text=rPrior.rand)))
 			model  <- nimbleModel(expmodel,constants=constants,data=d,inits=inits)
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
 			conf$addMonitors('r')
 			if (!is.null(rSampler))
 			{
-				suppressMessages(conf$removeSamplers('sigma'))
+				suppressMessages(conf$removeSamplers('r'))
 				do.call(conf$addSampler,rSampler)
 			}
 			MCMC <- buildMCMC(conf)
@@ -159,7 +163,7 @@ expfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dnorm
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
 		clusterEvalQ(cl,{library(nimble)})
-		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler)
+		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler,rPrior.rand=rPrior.rand)
 		stopCluster(cl)
 		results <- out
 	}

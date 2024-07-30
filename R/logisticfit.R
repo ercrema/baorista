@@ -11,15 +11,15 @@
 #' @param mSampler A list containing settings for the MCMC sampler for the parameter 'm'. Default is null and employs nimble's Default sampler (RW sampler).
 #' @param parallel Logical specifying whether the chains should be run in parallel or not.
 #' @param seeds Random seed for each chain. Default is 1:4.
-#' @details The function fits a discrete bounded logistic growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of two parameters, a growth rate (r) and a midpoint (m) defining the inflection point of the growth curve. Priors of the two parameters can be defined by the arguments \code{rPrior} and \code{mPrior}. In the latter case the object \code{z} is a placeholder for the number of blocks (e.g. the default 'dunif(1,z)` is a uniform across all blocks). Priors are defined by character strings following the syntax used by nimble. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.  
+#' @details The function fits a discrete bounded logistic growth model on the observed data using MCMC as implemented by the nimble package. The Bayesian model consists of two parameters, a growth rate (r) and a midpoint (m) defining the inflection point of the growth curve. Priors of the two parameters can be defined by the arguments \code{rPrior} and \code{mPrior}. In the latter case the object \code{z} is a placeholder for the number of blocks (e.g. the default 'dunif(1,z)` is a uniform across all blocks). Priors are defined by character strings following the syntax used by nimble. The distribution parameters defined in \code{rPrior} and \code{mPrior} are also used to generate initialisation values for the MCMC. Please note that the function returns posterior of the growth rate normalised by the resolution defined in the \code{ProbMat} class object.  MCMC settings such as the choice the sampler, number of iterations, chains, etc can also be specified.  
 #' @return A \code{fittedLogistic} class object containing the original ProbMat class object, posteriors of the growth rate and midpoint and their MCMC diagnostics (i.e. Gelman Rubin statistic and effective sample sizes).
 #' @import nimble
 #' @import coda
 #' @import parallel
-#' @importFrom stats runif rexp
+#' @importFrom stats runif rexp rchisq rt rlnorm rweibull rnorm rgamma rlogis rbeta rt rlnorm
 #' @export
 
-logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dexp(1/0.001)',mPrior='dunif(1,z)',rSampler=NULL,mSampler=NULL,parallel=FALSE,seeds=1:4)
+logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='dexp(rate=1/0.001)',mPrior='dunif(min=1,max=z)',rSampler=NULL,mSampler=NULL,parallel=FALSE,seeds=1:4)
 {
 	#Handle cleaning of GlobalEnv on exit
 	envobj <- ls(envir=.GlobalEnv)
@@ -31,6 +31,17 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 
 	# Initial Warnings
 	if (nchains==1) {warning('Running MCMC on single chain')}
+	# Check prior definitions
+	supported.distributions  <- data.frame(d=c('dnorm','dexp','dbeta','dchisq','dgamma','dlogis','dunif','dt','dweib','dlnorm'),r=c('rnorm','rexp','rbeta','rchisq','rgamma','rlogis','runif','rt','rweibull','rlnorm'))
+	if(!sub("\\(.*","",rPrior)%in%supported.distributions$d | !sub("\\(.*","",mPrior)%in%supported.distributions$d){stop(paste0('Unsupported distribution in prior definition. Please use one of the following: ',paste(supported.distributions$d,collapse=', ')))}
+	rPrior.rand1  <- supported.distributions$r[supported.distributions$d==strsplit(rPrior,"\\(")[[1]][1]]
+	rPrior.rand2 <- gsub("\\)","",strsplit(rPrior,"\\(")[[1]][2])
+	rPrior.rand <- paste0(rPrior.rand1,"(n=1,",rPrior.rand2,")")
+
+	mPrior.rand1  <- supported.distributions$r[supported.distributions$d==strsplit(mPrior,"\\(")[[1]][1]]
+	mPrior.rand2 <- gsub("\\)","",strsplit(mPrior,"\\(")[[1]][2])
+	mPrior.rand2 <- gsub('z','constants$z',mPrior.rand2)
+	mPrior.rand <- paste0(mPrior.rand1,"(n=1,",mPrior.rand2,")")
 
 	# Define Data
 	d  <- list(theta=x$pmat)
@@ -82,7 +93,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		for (k in 1:nchains)
 		{
 			set.seed(seeds[k])
-			inits[[k]]  <- list(r=rexp(1,1/0.01),m.raw=runif(1,1,constants$z))
+			inits[[k]]  <- list(r=eval(parse(text=rPrior.rand)),m.raw=eval(parse(text=mPrior.rand)))
 		}
 		message('Compiling nimble model...')
 		suppressMessages(model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits[[1]]))
@@ -91,7 +102,6 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		if (!is.null(rSampler))
 		{
 			suppressMessages(conf$removeSamplers('r'))
-			# 	rSampler=list('sigma',type='slice')
 			suppressMessages(do.call(conf$addSampler,rSampler))
 		}
 
@@ -112,7 +122,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 	if (parallel)
 	{
 		message('Running in parallel - progress bar will no be visualised')
-		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rSampler,mPrior,mSampler)
+		runfun  <- function(seed,constants,d,niter,thin,nburnin,rPrior,rPrior.rand,rSampler,mPrior,mPrior.rand,mSampler)
 		{
 			#Addresses R CMD Check NOTES
 			returnType <- m.raw <- nimStop <- nimMatrix <-  dALog <- rALog <- NULL
@@ -152,7 +162,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			logisticmodel <- gsub('mPrior', mPrior, logisticmodel) |> parse(text=_)
 
 			set.seed(seed)
-			inits  <- list(r=rexp(1,1/0.01),m=runif(1,1,constants$z))
+			inits  <- list(r=eval(parse(text=rPrior.rand)),m.raw=eval(parse(text=mPrior.rand)))
 			model  <- nimbleModel(logisticmodel,constants=constants,data=d,inits=inits)
 			cModel <- compileNimble(model)
 			conf <- configureMCMC(model)
@@ -162,7 +172,6 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 			if (!is.null(rSampler))
 			{
 				suppressMessages(conf$removeSamplers('r'))
-				# 	rSampler=list('sigma',type='slice')
 				suppressMessages(do.call(conf$addSampler,rSampler))
 			}
 
@@ -182,7 +191,7 @@ logisticfit  <- function(x,niter=100000,nburnin=50000,thin=10,nchains=4,rPrior='
 		ncores  <- nchains
 		cl  <- makeCluster(ncores)
 		clusterEvalQ(cl,{library(nimble)})
-		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rSampler=rSampler,mPrior=mPrior,mSampler=mSampler)
+		out  <- parLapply(cl=cl,X=seeds,fun=runfun,d=d,constants=constants,nburnin=nburnin,niter=niter,thin=thin,rPrior=rPrior,rPrior.rand=rPrior.rand,rSampler=rSampler,mPrior=mPrior,mPrior.rand=mPrior.rand,mSampler=mSampler)
 		stopCluster(cl)
 		results <- out
 	}
