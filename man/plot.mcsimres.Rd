@@ -7,6 +7,7 @@
 \method{plot}{mcsimres}(
   x,
   interval = 0.9,
+  changexpr = expression((t1 - t0)/r),
   minortick = NULL,
   ylim = NULL,
   xlab = NULL,
@@ -27,6 +28,8 @@
 \item{x}{A \code{mcsimres} class object generated using the \code{mcsim()} function.}
 
 \item{interval}{A value between 0 and 1 defining the percentile interval. Default is 0.9.}
+
+\item{changexpr}{An \code{expression} for calculating the rate of change  between abutting time-blocks. Available input options are \code{t1} (the focal time-block), \code{t0} (the previous time-block), \code{r} (the distance between t0 and t1, i.e. the time-block resolution), and any other standard constants and mathematical operators. Default is \code{expression((t1-t0)/r)}. A possible alternative could be \code{expression(log(t1/t0)/r)}.}
 
 \item{minortick}{Interval for minor ticks in the x-axis label. Default is estimated based on timescale.}
 

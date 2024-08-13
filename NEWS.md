@@ -1,3 +1,6 @@
+# Version 0.2.1
+ * Fixed a bug on the calculation of rate of change in `plot.mcsimres()` and added option for an user defined rate of change formula.
+
 # Version 0.2.0
  * Fixed bug on logistic growth model plot function
  * Fixed bug on prior definition for exponential growth model
