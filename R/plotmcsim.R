@@ -2,6 +2,7 @@
 #' @description Plot Monte-Carlo simulation based percentile  intervals on frequency or rate of change of events.
 #' @param x A \code{mcsimres} class object generated using the \code{mcsim()} function.
 #' @param interval A value between 0 and 1 defining the percentile interval. Default is 0.9.
+#' @param changexpr An \code{expression} for calculating the rate of change  between abutting time-blocks. Available input options are \code{t1} (the focal time-block), \code{t0} (the previous time-block), \code{r} (the distance between t0 and t1, i.e. the time-block resolution), and any other standard constants and mathematical operators. Default is \code{expression((t1-t0)/r)}. A possible alternative could be \code{expression(log(t1/t0)/r)}.
 #' @param minortick Interval for minor ticks in the x-axis label. Default is estimated based on timescale.
 #' @param ylim Limits of the y-axis. Default estimated from posterior ranges.
 #' @param xlab Label for the x-axis. Default based on \code{calendar}.
@@ -23,7 +24,7 @@
 #' @export
 
 
-plot.mcsimres <- function(x,interval=0.9,minortick=NULL,ylim=NULL,xlab=NULL,ylab=NULL,calendar='BP',col='black',lwd=1,lty=1,col.fill='lightblue',pch=20,type='sum',plot.legend=TRUE,legend.arg=NULL,...)
+plot.mcsimres <- function(x,interval=0.9,changexpr=expression((t1-t0)/r),minortick=NULL,ylim=NULL,xlab=NULL,ylab=NULL,calendar='BP',col='black',lwd=1,lty=1,col.fill='lightblue',pch=20,type='sum',plot.legend=TRUE,legend.arg=NULL,...)
 {
 	oldpar <- par(no.readonly = TRUE)
 	on.exit(par(oldpar))
@@ -45,7 +46,8 @@ plot.mcsimres <- function(x,interval=0.9,minortick=NULL,ylim=NULL,xlab=NULL,ylab
 		{
 			t0 <- x$sums[i,]
 			t1 <- x$sums[i+1,]
-			roc.mat[i,]  <- (t0/t1)^(1/r)-1
+# 			roc.mat[i,]  <- (t1/t0)^(1/r)-1
+			roc.mat[i,]  <- eval(changexpr)
 		}
 		roc.mat[which(roc.mat==Inf|roc.mat==-Inf|is.nan(roc.mat),arr.ind=T)] <- NA
 		midVals <- apply(roc.mat,1,median,na.rm=T) 
