@@ -1,4 +1,4 @@
-[![cran version](http://www.r-pkg.org/badges/version/baorista)](https://CRAN.R-project.org/package=baorista) 
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/baorista)](http://CRAN.R-project.org/package=baorista)
 [![development version](https://img.shields.io/badge/devel%20version-0.2.1-lightblue.svg)](https://github.com/ercrema/baorista)
 [![R-hub](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml/badge.svg)](https://github.com/ercrema/baorista/actions/workflows/rhub.yaml)
 [![](https://cranlogs.r-pkg.org/badges/grand-total/baorista)](https://cran.r-project.org/package=baorista)
